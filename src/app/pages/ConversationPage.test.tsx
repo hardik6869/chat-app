@@ -19,7 +19,7 @@ function renderAt(path: string) {
 
 const openInfo = async () => {
   await userEvent.click(await screen.findByRole('button', { name: 'Group info' }));
-  return screen.getByRole('complementary', { name: 'Group info' });
+  return screen.findByRole('complementary', { name: 'Group info' });
 };
 
 describe('Group info', () => {

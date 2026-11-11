@@ -7,7 +7,7 @@ import { splitMatches } from '../../lib';
 
 const CONVERSATION = 'c-design';
 const searchButton = () => screen.getByRole('button', { name: 'Search messages' });
-const searchBox = () => screen.getByRole('searchbox', { name: 'Search messages' });
+const searchBox = () => screen.findByRole('searchbox', { name: 'Search messages' });
 
 describe('splitMatches', () => {
   it('marks every case-insensitive match', () => {
@@ -33,9 +33,9 @@ describe('Message search', () => {
   it('finds messages, highlights matches and jumps to the picked one', async () => {
     renderChat(CONVERSATION);
     await userEvent.click(searchButton());
-    expect(searchBox()).toHaveFocus();
+    expect(await searchBox()).toHaveFocus();
 
-    await userEvent.type(searchBox(), 'tokens');
+    await userEvent.type(await searchBox(), 'tokens');
     const result = await screen.findByRole('button', { name: /Shared the new color tokens/ });
     expect(within(result).getByText('tokens', { selector: 'mark' })).toBeInTheDocument();
     expect(screen.getByText('1 result')).toBeInTheDocument();
@@ -56,11 +56,11 @@ describe('Message search', () => {
     await screen.findByText('Notes from today are in the doc.');
 
     await userEvent.keyboard('{Control>}f{/Control}');
-    await userEvent.type(searchBox(), 'zzz');
+    await userEvent.type(await searchBox(), 'zzz');
     expect(await screen.findByText(/No messages match/)).toBeInTheDocument();
 
     await userEvent.keyboard('{Escape}');
-    expect(searchBox()).toHaveValue('');
+    expect(await searchBox()).toHaveValue('');
 
     await userEvent.keyboard('{Escape}');
     expect(screen.queryByRole('searchbox')).toBeNull();
@@ -76,7 +76,7 @@ describe('Message search', () => {
     renderChat(CONVERSATION);
     await userEvent.click(searchButton());
 
-    await userEvent.type(searchBox(), 'notes');
+    await userEvent.type(await searchBox(), 'notes');
     expect(await screen.findByRole('alert')).toHaveTextContent("Couldn't search messages.");
 
     await userEvent.click(screen.getByRole('button', { name: 'Try again' }));

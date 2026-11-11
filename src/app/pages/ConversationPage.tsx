@@ -1,9 +1,17 @@
 import { Info } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { Suspense, useRef, useState } from 'react';
 import { useParams } from 'react-router';
 import { GroupInfoPanel, useIsGroup } from '@/features/groups';
 import { ChatWindow } from '@/features/messages';
-import { IconButton } from '@/shared/ui';
+import { IconButton, Spinner } from '@/shared/ui';
+
+function PanelFallback() {
+  return (
+    <div className="absolute inset-0 z-30 flex items-center justify-center bg-surface md:left-auto md:w-80 md:border-l md:border-border xl:static">
+      <Spinner label="Loading group info" />
+    </div>
+  );
+}
 
 /** Composes the chat with the group info panel; the two features stay independent. */
 function Conversation({ conversationId }: { conversationId: string }) {
@@ -34,7 +42,11 @@ function Conversation({ conversationId }: { conversationId: string }) {
       }
       aside={
         isGroup &&
-        infoOpen && <GroupInfoPanel conversationId={conversationId} onClose={closeInfo} />
+        infoOpen && (
+          <Suspense fallback={<PanelFallback />}>
+            <GroupInfoPanel conversationId={conversationId} onClose={closeInfo} />
+          </Suspense>
+        )
       }
     />
   );

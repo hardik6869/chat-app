@@ -1,5 +1,5 @@
 import { MessageSquareOff, Search } from 'lucide-react';
-import { useRef, useState, type ReactNode } from 'react';
+import { lazy, Suspense, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router';
 import { cn } from '@/shared/lib';
 import { useKeyboardShortcut } from '@/shared/hooks';
@@ -9,7 +9,12 @@ import { ChatHeader } from '../ChatHeader';
 import { Composer } from '../Composer';
 import { DeleteMessageDialog } from '../DeleteMessageDialog';
 import { MessageList } from '../MessageList';
-import { MessageSearch } from '../MessageSearch';
+import { Spinner } from '@/shared/ui';
+
+// Loaded on first use: search is opened rarely.
+const MessageSearch = lazy(() =>
+  import('../MessageSearch').then((module) => ({ default: module.MessageSearch })),
+);
 import { TypingIndicator } from '../TypingIndicator';
 
 interface ChatWindowProps {
@@ -77,7 +82,17 @@ export function ChatWindow({ conversationId, headerActions, aside }: ChatWindowP
           <div className="relative min-h-0 flex-1 bg-surface-muted">
             <MessageList conversationId={conversationId} />
             <TypingIndicator conversationId={conversationId} />
-            {searchOpen && <MessageSearch conversationId={conversationId} onClose={closeSearch} />}
+            {searchOpen && (
+              <Suspense
+                fallback={
+                  <div className="absolute top-2 right-4 z-20 rounded-full bg-surface p-2 shadow-sm">
+                    <Spinner label="Loading search" />
+                  </div>
+                }
+              >
+                <MessageSearch conversationId={conversationId} onClose={closeSearch} />
+              </Suspense>
+            )}
           </div>
           <Composer conversationId={conversationId} />
           <DeleteMessageDialog />
