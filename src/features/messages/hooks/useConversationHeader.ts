@@ -1,6 +1,5 @@
 import { useShallow } from 'zustand/react/shallow';
-import { getConversationTitle, getPartnerId, isGroup } from '@/entities';
-import { formatListTime } from '@/shared/lib';
+import { getConversationTitle, getPartnerId, isGroup, presenceText } from '@/entities';
 import { useChatStore } from '@/store';
 
 interface ConversationHeader {
@@ -29,14 +28,11 @@ export function useConversationHeader(conversationId: string): ConversationHeade
       }
 
       const partner = state.users[getPartnerId(conversation, state.currentUserId)];
-      const lastSeen = partner?.lastSeenAt
-        ? `Last seen ${formatListTime(partner.lastSeenAt)}`
-        : 'Offline';
       return {
         title,
         avatarUrl: partner?.avatarUrl,
         isOnline: partner?.isOnline ?? false,
-        subtitle: partner?.isOnline ? 'Online' : lastSeen,
+        subtitle: presenceText(partner),
       };
     }),
   );

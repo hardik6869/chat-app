@@ -1,5 +1,5 @@
 import { MessageSquareOff, Search } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router';
 import { cn } from '@/shared/lib';
 import { useKeyboardShortcut } from '@/shared/hooks';
@@ -12,8 +12,16 @@ import { MessageList } from '../MessageList';
 import { MessageSearch } from '../MessageSearch';
 import { TypingIndicator } from '../TypingIndicator';
 
-/** One open conversation: header, messages and composer. */
-export function ChatWindow({ conversationId }: { conversationId: string }) {
+interface ChatWindowProps {
+  conversationId: string;
+  /** Extra header buttons supplied by the app (e.g. group info). */
+  headerActions?: ReactNode;
+  /** Side content supplied by the app (e.g. the group info panel). */
+  aside?: ReactNode;
+}
+
+/** One open conversation: header, messages and composer, plus optional side panel. */
+export function ChatWindow({ conversationId, headerActions, aside }: ChatWindowProps) {
   const { notFound } = useActiveConversation(conversationId);
   const [searchOpen, setSearchOpen] = useState(false);
   const searchButtonRef = useRef<HTMLButtonElement>(null);
@@ -44,31 +52,37 @@ export function ChatWindow({ conversationId }: { conversationId: string }) {
   }
 
   return (
-    <div className="flex h-full flex-col">
-      <ChatHeader
-        conversationId={conversationId}
-        actions={
-          <IconButton
-            ref={searchButtonRef}
-            icon={Search}
-            label="Search messages"
-            aria-keyshortcuts="Control+F Meta+F"
-            aria-expanded={searchOpen}
-            onClick={() => {
-              setSearchOpen((open) => !open);
-            }}
-          />
-        }
-      />
-      <ErrorBoundary title="Couldn't show this conversation" className="flex-1">
-        <div className="relative min-h-0 flex-1 bg-surface-muted">
-          <MessageList conversationId={conversationId} />
-          <TypingIndicator conversationId={conversationId} />
-          {searchOpen && <MessageSearch conversationId={conversationId} onClose={closeSearch} />}
-        </div>
-        <Composer conversationId={conversationId} />
-        <DeleteMessageDialog />
-      </ErrorBoundary>
+    <div className="relative flex h-full">
+      <div className="flex min-w-0 flex-1 flex-col">
+        <ChatHeader
+          conversationId={conversationId}
+          actions={
+            <>
+              <IconButton
+                ref={searchButtonRef}
+                icon={Search}
+                label="Search messages"
+                aria-keyshortcuts="Control+F Meta+F"
+                aria-expanded={searchOpen}
+                onClick={() => {
+                  setSearchOpen((open) => !open);
+                }}
+              />
+              {headerActions}
+            </>
+          }
+        />
+        <ErrorBoundary title="Couldn't show this conversation" className="flex-1">
+          <div className="relative min-h-0 flex-1 bg-surface-muted">
+            <MessageList conversationId={conversationId} />
+            <TypingIndicator conversationId={conversationId} />
+            {searchOpen && <MessageSearch conversationId={conversationId} onClose={closeSearch} />}
+          </div>
+          <Composer conversationId={conversationId} />
+          <DeleteMessageDialog />
+        </ErrorBoundary>
+      </div>
+      {aside}
     </div>
   );
 }

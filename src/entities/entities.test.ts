@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   canEditMessage,
+  presenceText,
   getConversationTitle,
   getPartnerId,
   isGroup,
@@ -62,6 +63,17 @@ describe('conversation helpers', () => {
     expect(getConversationTitle({ ...direct, memberIds: [ME, 'ghost'] }, users, ME)).toBe(
       'Unknown user',
     );
+  });
+});
+
+describe('presenceText', () => {
+  it('describes online, last seen and unknown users', () => {
+    expect(presenceText({ id: 'a', name: 'A', isOnline: true })).toBe('Online');
+    expect(
+      presenceText({ id: 'b', name: 'B', isOnline: false, lastSeenAt: new Date().toISOString() }),
+    ).toMatch(/^Last seen \d/);
+    expect(presenceText({ id: 'c', name: 'C', isOnline: false })).toBe('Offline');
+    expect(presenceText(undefined)).toBe('Offline');
   });
 });
 

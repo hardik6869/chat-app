@@ -1,0 +1,1 @@
+export { GroupInfoPanel } from './GroupInfoPanel';
