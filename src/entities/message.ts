@@ -1,5 +1,5 @@
 /** Lifecycle of an outgoing message: optimistic → server → recipient → seen (or failed). */
-export type MessageStatus = 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
+type MessageStatus = 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
 
 export interface Reaction {
   emoji: string;
