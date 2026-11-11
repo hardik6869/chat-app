@@ -11,6 +11,14 @@ export function ThreadRowView({ row, isGroup }: { row: ThreadRow; isGroup: boole
       );
     case 'date':
       return <DateSeparator date={row.date} />;
+    case 'unread':
+      return (
+        <p className="flex items-center gap-3 pt-4 pb-1 text-xs font-semibold text-primary-text">
+          <span aria-hidden className="h-px flex-1 bg-primary" />
+          {row.count} unread {row.count === 1 ? 'message' : 'messages'}
+          <span aria-hidden className="h-px flex-1 bg-primary" />
+        </p>
+      );
     case 'message':
       return (
         <MessageBubble

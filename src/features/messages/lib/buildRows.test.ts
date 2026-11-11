@@ -54,6 +54,20 @@ describe('buildRows', () => {
     expect(rows.every((row) => row.isFirstInGroup)).toBe(true);
   });
 
+  it('puts the unread divider before the first unread message', () => {
+    const messages = [
+      message('a', 'ava', at(11, 9, 0)),
+      message('b', 'ava', at(11, 9, 30)),
+      message('c', 'ava', at(11, 10, 0)),
+    ];
+
+    const keys = (unread: number) => buildRows(messages, 'me', unread).map((row) => row.key);
+
+    expect(keys(0)).not.toContain('unread-divider');
+    expect(keys(2)).toEqual([expect.stringMatching(/^date-/), 'a', 'unread-divider', 'b', 'c']);
+    expect(keys(9)).toEqual([expect.stringMatching(/^date-/), 'unread-divider', 'a', 'b', 'c']);
+  });
+
   it('returns nothing for an empty thread', () => {
     expect(buildRows([], 'me')).toEqual([]);
   });

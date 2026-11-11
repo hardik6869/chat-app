@@ -18,6 +18,8 @@ export interface SessionSlice {
   conversations: Record<string, Conversation>;
   bootstrapStatus: LoadStatus;
   activeConversationId?: string;
+  /** Unread count captured when a chat is opened, to place the "unread" divider. */
+  unreadMarkers: Record<string, number>;
   bootstrap: () => Promise<void>;
   /** Opens a conversation: loads its messages and marks it read. */
   setActiveConversation: (conversationId?: string) => void;

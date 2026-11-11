@@ -34,12 +34,14 @@ export function MessageList({ conversationId }: { conversationId: string }) {
     if (rows.length > 0) virtualizer.scrollToIndex(rows.length - 1, { align: 'end' });
   }, [rows.length, virtualizer]);
 
-  // Open at the newest message.
+  // Open at the first unread message if there is one, otherwise at the newest.
   useLayoutEffect(() => {
     if (didInitialScroll.current || rows.length === 0) return;
     didInitialScroll.current = true;
-    scrollToBottom();
-  }, [rows.length, scrollToBottom]);
+    const unreadIndex = rows.findIndex((row) => row.type === 'unread');
+    if (unreadIndex > 0) virtualizer.scrollToIndex(unreadIndex, { align: 'start' });
+    else scrollToBottom();
+  }, [rows, scrollToBottom, virtualizer]);
 
   const ready = status === 'success' && rows.length > 0;
   const { atBottom, unseenCount } = useAutoScroll({

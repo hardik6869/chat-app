@@ -22,6 +22,7 @@ export function useThread(conversationId: string) {
     }),
   );
   const currentUserId = useChatStore((state) => state.currentUserId);
+  const unreadMarker = useChatStore((state) => state.unreadMarkers[conversationId] ?? 0);
   const group = useChatStore((state) => {
     const conversation = state.conversations[conversationId];
     return conversation ? isGroup(conversation) : false;
@@ -31,10 +32,10 @@ export function useThread(conversationId: string) {
   const loadOlderMessages = useChatStore((state) => state.loadOlderMessages);
 
   const rows = useMemo(() => {
-    const built = buildRows(messages, currentUserId);
+    const built = buildRows(messages, currentUserId, unreadMarker);
     // Once everything is loaded, mark the beginning of the conversation.
     return hasMore || built.length === 0 ? built : [START_ROW, ...built];
-  }, [messages, currentUserId, hasMore]);
+  }, [messages, currentUserId, unreadMarker, hasMore]);
 
   const retry = useCallback(() => {
     void loadMessages(conversationId);

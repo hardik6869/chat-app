@@ -10,6 +10,7 @@ export const createSessionSlice: SliceCreator<SessionSlice> = (set, get, { api }
   conversations: {},
   bootstrapStatus: 'idle',
   activeConversationId: undefined,
+  unreadMarkers: {},
 
   async bootstrap() {
     if (get().bootstrapStatus === 'loading') return;
@@ -29,7 +30,12 @@ export const createSessionSlice: SliceCreator<SessionSlice> = (set, get, { api }
   },
 
   setActiveConversation(conversationId) {
-    set({ activeConversationId: conversationId });
+    const unread = conversationId ? (get().conversations[conversationId]?.unreadCount ?? 0) : 0;
+    set({
+      activeConversationId: conversationId,
+      // Remember where unread messages start before they are marked read.
+      unreadMarkers: conversationId && unread > 0 ? { [conversationId]: unread } : {},
+    });
     if (!conversationId) return;
     void get().loadMessages(conversationId);
     if (get().conversations[conversationId]?.unreadCount) void get().markAsRead(conversationId);
