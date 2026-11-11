@@ -12,6 +12,13 @@ export interface Thread {
   olderStatus: LoadStatus;
 }
 
+/** Where the "unread" divider goes: the first message that was unread when the chat opened. */
+export interface UnreadMarker {
+  count: number;
+  /** Resolved once the chat's messages are loaded. */
+  messageId?: string;
+}
+
 export interface SessionSlice {
   currentUserId: string;
   users: Record<string, User>;
@@ -19,7 +26,7 @@ export interface SessionSlice {
   bootstrapStatus: LoadStatus;
   activeConversationId?: string;
   /** Unread count captured when a chat is opened, to place the "unread" divider. */
-  unreadMarkers: Record<string, number>;
+  unreadMarkers: Record<string, UnreadMarker>;
   bootstrap: () => Promise<void>;
   /**
    * Opens a conversation: loads its messages and marks it read. `unreadMarker` is the unread

@@ -28,15 +28,14 @@ function sameGroup(a: Message | undefined, b: Message) {
 
 /**
  * Flattens messages (oldest first) into rows with date separators, grouping flags and,
- * when `unreadCount` > 0, an "unread" divider before the first unread message.
+ * an "unread" divider before the message that was first unread when the chat opened.
  */
 export function buildRows(
   messages: readonly Message[],
   currentUserId: string,
-  unreadCount = 0,
+  unread?: { messageId?: string; count: number },
 ): ThreadRow[] {
   const rows: ThreadRow[] = [];
-  const firstUnread = unreadCount > 0 ? Math.max(0, messages.length - unreadCount) : -1;
 
   messages.forEach((message, index) => {
     const previous = messages[index - 1];
@@ -45,8 +44,8 @@ export function buildRows(
       rows.push({ type: 'date', key: `date-${dayOf(message.createdAt)}`, date: message.createdAt });
     }
 
-    if (index === firstUnread) {
-      rows.push({ type: 'unread', key: 'unread-divider', count: unreadCount });
+    if (message.id === unread?.messageId) {
+      rows.push({ type: 'unread', key: 'unread-divider', count: unread.count });
     }
 
     rows.push({

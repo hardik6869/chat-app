@@ -54,18 +54,35 @@ describe('buildRows', () => {
     expect(rows.every((row) => row.isFirstInGroup)).toBe(true);
   });
 
-  it('puts the unread divider before the first unread message', () => {
+  it('puts the unread divider before the first unread message, and keeps it there', () => {
     const messages = [
       message('a', 'ava', at(11, 9, 0)),
       message('b', 'ava', at(11, 9, 30)),
       message('c', 'ava', at(11, 10, 0)),
     ];
+    const keys = (list: Message[], unread?: { messageId?: string; count: number }) =>
+      buildRows(list, 'me', unread).map((row) => row.key);
+    const day = expect.stringMatching(/^date-/) as unknown;
 
-    const keys = (unread: number) => buildRows(messages, 'me', unread).map((row) => row.key);
+    expect(keys(messages)).not.toContain('unread-divider');
+    expect(keys(messages, { count: 2 })).not.toContain('unread-divider');
+    expect(keys(messages, { messageId: 'b', count: 2 })).toEqual([
+      day,
+      'a',
+      'unread-divider',
+      'b',
+      'c',
+    ]);
 
-    expect(keys(0)).not.toContain('unread-divider');
-    expect(keys(2)).toEqual([expect.stringMatching(/^date-/), 'a', 'unread-divider', 'b', 'c']);
-    expect(keys(9)).toEqual([expect.stringMatching(/^date-/), 'unread-divider', 'a', 'b', 'c']);
+    const later = [...messages, message('d', 'me', at(11, 10, 5))];
+    expect(keys(later, { messageId: 'b', count: 2 })).toEqual([
+      day,
+      'a',
+      'unread-divider',
+      'b',
+      'c',
+      'd',
+    ]);
   });
 
   it('returns nothing for an empty thread', () => {

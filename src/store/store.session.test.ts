@@ -37,6 +37,26 @@ describe('session', () => {
     expect(db.conversations.get('c-ava')?.unreadCount).toBe(0);
   });
 
+  it('pins the unread divider to the first unread message, skipping my own', async () => {
+    const { store } = await ready();
+    await store.getState().loadMessages('c-liam');
+
+    store.getState().setActiveConversation('c-liam', 1);
+
+    // c-liam-m3 is mine (newest), so the one unread message is Liam's c-liam-m2.
+    expect(store.getState().unreadMarkers['c-liam']).toEqual({ count: 1, messageId: 'c-liam-m2' });
+  });
+
+  it('resolves the divider once messages arrive if the chat opened first', async () => {
+    const { store } = await ready();
+
+    store.getState().setActiveConversation('c-ava', 2);
+    expect(store.getState().unreadMarkers['c-ava']).toEqual({ count: 2 });
+
+    await flush();
+    expect(store.getState().unreadMarkers['c-ava']).toEqual({ count: 2, messageId: 'c-ava-m4' });
+  });
+
   it('adds and removes group members', async () => {
     const { store } = await ready();
 

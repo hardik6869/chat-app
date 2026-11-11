@@ -1,4 +1,5 @@
 import { captureError } from '@/shared/lib';
+import { resolveUnreadMarker } from '../helpers';
 import type { SessionSlice, SliceCreator } from '../types';
 
 const byId = <T extends { id: string }>(items: readonly T[]) =>
@@ -33,7 +34,10 @@ export const createSessionSlice: SliceCreator<SessionSlice> = (set, get, { api }
     set({
       activeConversationId: conversationId,
       focusedMessageId: undefined,
-      unreadMarkers: conversationId && unreadMarker > 0 ? { [conversationId]: unreadMarker } : {},
+      unreadMarkers:
+        conversationId && unreadMarker > 0
+          ? { [conversationId]: resolveUnreadMarker(get(), conversationId, unreadMarker) }
+          : {},
     });
     if (!conversationId) return;
     void get().loadMessages(conversationId);

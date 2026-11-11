@@ -1,7 +1,28 @@
 import type { Message } from '@/entities';
-import type { ChatState } from './types';
+import type { ChatState, UnreadMarker } from './types';
 
 type Patch = Partial<ChatState>;
+
+/**
+ * Pins the unread divider to a message id once the thread's ids are known: walk back from the
+ * newest message, counting only other people's messages (mine are never unread).
+ */
+export function resolveUnreadMarker(
+  state: ChatState,
+  conversationId: string,
+  count: number,
+): UnreadMarker {
+  const ids = state.threads[conversationId]?.ids ?? [];
+  if (ids.length === 0) return { count };
+  let remaining = count;
+  for (let index = ids.length - 1; index >= 0; index -= 1) {
+    const id = ids[index] ?? '';
+    if (state.messages[id]?.senderId === state.currentUserId) continue;
+    remaining -= 1;
+    if (remaining === 0) return { count, messageId: id };
+  }
+  return { count, messageId: ids[0] };
+}
 
 /** Adds a message to its conversation: thread (if loaded), lastMessage and unread count. */
 export function appendMessage(state: ChatState, message: Message, unreadDelta = 0): Patch {

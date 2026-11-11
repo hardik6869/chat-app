@@ -1,6 +1,6 @@
 import { toggleReaction as applyReaction, type Message } from '@/entities';
 import { captureError, createId } from '@/shared/lib';
-import { appendMessage, replaceMessage } from '../helpers';
+import { appendMessage, replaceMessage, resolveUnreadMarker } from '../helpers';
 import type { MessagesSlice, SliceCreator, Thread } from '../types';
 
 const emptyThread: Thread = { ids: [], hasMore: false, status: 'idle', olderStatus: 'idle' };
@@ -75,6 +75,16 @@ export const createMessagesSlice: SliceCreator<MessagesSlice> = (set, get, { api
           hasMore: page.hasMore,
           status: 'success',
         });
+        // The chat was opened before its messages arrived: pin the unread divider now.
+        const marker = get().unreadMarkers[conversationId];
+        if (marker && !marker.messageId) {
+          set((state) => ({
+            unreadMarkers: {
+              ...state.unreadMarkers,
+              [conversationId]: resolveUnreadMarker(state, conversationId, marker.count),
+            },
+          }));
+        }
       } catch (error) {
         captureError(error, 'loadMessages');
         setThread(conversationId, { status: 'error' });

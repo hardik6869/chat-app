@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { useChatStore } from '@/store';
@@ -26,6 +26,25 @@ describe('Unread divider', () => {
       expect(useChatStore.getState().conversations['c-design']?.unreadCount).toBe(0);
     });
     expect(screen.getByText('3 unread messages')).toBeInTheDocument();
+
+    // New messages arrive while reading: the divider stays above the same message.
+    act(() => {
+      useChatStore.getState().handleRealtimeEvent({
+        type: 'message:new',
+        message: {
+          id: 'late',
+          conversationId: 'c-design',
+          senderId: 'ava',
+          text: 'One more thing',
+          createdAt: new Date().toISOString(),
+          status: 'sent',
+          reactions: [],
+        },
+      });
+    });
+    expect(
+      screen.getByText('3 unread messages').closest('[role="listitem"]')?.nextElementSibling,
+    ).toHaveTextContent('Running 5 min late, start without me!');
   });
 
   it('keeps the divider under StrictMode, where effects run twice', async () => {

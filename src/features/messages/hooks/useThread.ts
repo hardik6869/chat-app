@@ -22,7 +22,7 @@ export function useThread(conversationId: string) {
     }),
   );
   const currentUserId = useChatStore((state) => state.currentUserId);
-  const unreadMarker = useChatStore((state) => state.unreadMarkers[conversationId] ?? 0);
+  const unreadMarker = useChatStore((state) => state.unreadMarkers[conversationId]);
   const group = useChatStore((state) => {
     const conversation = state.conversations[conversationId];
     return conversation ? isGroup(conversation) : false;
