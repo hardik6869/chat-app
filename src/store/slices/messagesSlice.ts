@@ -3,6 +3,9 @@ import { captureError, createId } from '@/shared/lib';
 import { appendMessage, replaceMessage, resolveUnreadMarker } from '../helpers';
 import type { MessagesSlice, SliceCreator, Thread } from '../types';
 
+/** Read live each time: the connection can drop while a request is in flight. */
+const isOffline = () => !navigator.onLine;
+
 const emptyThread: Thread = { ids: [], hasMore: false, status: 'idle', olderStatus: 'idle' };
 
 export const createMessagesSlice: SliceCreator<MessagesSlice> = (set, get, { api, realtime }) => {
@@ -21,12 +24,27 @@ export const createMessagesSlice: SliceCreator<MessagesSlice> = (set, get, { api
     }));
   };
 
+  const queue = (messageId: string) => {
+    set((state) => ({
+      outbox: state.outbox.includes(messageId) ? state.outbox : [...state.outbox, messageId],
+    }));
+  };
+
+  /** Sends a message; while offline it waits in the outbox (still "sending") instead of failing. */
   async function deliver(message: Message) {
+    if (isOffline()) {
+      queue(message.id);
+      return;
+    }
     try {
       const saved = await api.sendMessage(message);
       set((state) => replaceMessage(state, saved));
       realtime.send({ type: 'message:sent', message: saved });
     } catch (error) {
+      if (isOffline()) {
+        queue(message.id);
+        return;
+      }
       captureError(error, 'sendMessage');
       set((state) => replaceMessage(state, { ...message, status: 'failed' }));
     }
@@ -62,6 +80,16 @@ export const createMessagesSlice: SliceCreator<MessagesSlice> = (set, get, { api
   return {
     messages: {},
     threads: {},
+    outbox: [],
+
+    async flushOutbox() {
+      const queued = get().outbox;
+      set({ outbox: [] });
+      for (const messageId of queued) {
+        const message = get().messages[messageId];
+        if (message?.status === 'sending') await deliver(message);
+      }
+    },
 
     async loadMessages(conversationId) {
       const status = get().threads[conversationId]?.status;

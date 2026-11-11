@@ -12,6 +12,8 @@ interface ChatApiOptions {
   latencyMs?: number;
   failureRate?: number;
   random?: () => number;
+  /** Requests fail like a real network call while this returns false. */
+  isOnline?: () => boolean;
 }
 
 interface SendMessageInput {
@@ -28,6 +30,7 @@ export function createChatApi({
   latencyMs = mockConfig.latencyMs,
   failureRate = mockConfig.failureRate,
   random = Math.random,
+  isOnline = () => navigator.onLine,
 }: ChatApiOptions = {}) {
   const me = db.currentUserId;
 
@@ -36,6 +39,7 @@ export function createChatApi({
     if (latencyMs > 0) {
       await new Promise((resolve) => setTimeout(resolve, latencyMs * (0.5 + random())));
     }
+    if (!isOnline()) throw new ApiError('NETWORK', 'You are offline');
     if (random() < failureRate) throw new ApiError('NETWORK', 'Network request failed');
     const result = structuredClone(handler());
     if (write) db.touch();

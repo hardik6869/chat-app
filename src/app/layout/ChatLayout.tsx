@@ -4,6 +4,7 @@ import { ThemeToggle } from '@/features/theme';
 import { ErrorState } from '@/shared/ui';
 import { useChatSession, useUnreadTitle } from '../hooks';
 import { AppShell } from './AppShell';
+import { OfflineBanner } from './OfflineBanner';
 
 /** Root route: starts the session and lays out sidebar + routed chat. */
 export function ChatLayout() {
@@ -24,11 +25,14 @@ export function ChatLayout() {
   }
 
   return (
-    <AppShell
-      sidebar={<Sidebar actions={<ThemeToggle />} />}
-      hasSelection={conversationId !== undefined}
-    >
-      <Outlet />
-    </AppShell>
+    <div className="flex h-dvh flex-col">
+      <OfflineBanner />
+      <AppShell
+        sidebar={<Sidebar actions={<ThemeToggle />} />}
+        hasSelection={conversationId !== undefined}
+      >
+        <Outlet />
+      </AppShell>
+    </div>
   );
 }

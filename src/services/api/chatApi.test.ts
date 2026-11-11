@@ -152,6 +152,13 @@ describe('chatApi', () => {
     await expectApiError(api.addMember('c-ava', 'mia'), 'FORBIDDEN');
   });
 
+  it('fails like a real request while the browser is offline', async () => {
+    const db = createDatabase(createSeed(NOW));
+    const api = createChatApi({ db, latencyMs: 0, failureRate: 0, isOnline: () => false });
+
+    await expectApiError(api.fetchBootstrap(), 'NETWORK');
+  });
+
   it('simulates latency and network failures', async () => {
     vi.useFakeTimers();
     const { api } = setup({ latencyMs: 400 });

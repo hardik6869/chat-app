@@ -124,6 +124,11 @@ export function createRealtimeSimulator(db: Database, options: SimulatorOptions 
       () => {
         ambientTimer = undefined;
         const conversation = pick([...db.conversations.values()]);
+        // Like a dropped socket: nothing arrives while the browser is offline.
+        if (!navigator.onLine) {
+          startAmbient();
+          return;
+        }
         if (random() < 0.6 && conversation) simulateIncoming(conversation, 0);
         else togglePresence();
         startAmbient();

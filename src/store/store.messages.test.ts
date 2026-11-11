@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { setErrorReporter } from '@/shared/lib';
 import { bootstrapTestStore as ready } from '@/test';
 import { selectThreadMessages } from './selectors';
@@ -89,5 +89,41 @@ describe('messages', () => {
     expect(store.getState().messages['c-ava-m0']?.text).toBe(
       'Morning! Did you get a chance to look at the onboarding flow?',
     );
+  });
+
+  describe('while offline', () => {
+    const setOnline = (online: boolean) => {
+      Object.defineProperty(navigator, 'onLine', { configurable: true, value: online });
+    };
+
+    afterEach(() => {
+      Reflect.deleteProperty(navigator, 'onLine');
+    });
+
+    it('queues messages and sends them in order when back online', async () => {
+      const { store, api, realtime } = await ready();
+      await store.getState().loadMessages('c-ava');
+      const send = vi.spyOn(api, 'sendMessage');
+      setOnline(false);
+
+      await store.getState().sendMessage('c-ava', 'First');
+      await store.getState().sendMessage('c-ava', 'Second');
+
+      const queued = selectThreadMessages(store.getState(), 'c-ava').slice(-2);
+      expect(queued.map((m) => [m.text, m.status])).toEqual([
+        ['First', 'sending'],
+        ['Second', 'sending'],
+      ]);
+      expect(store.getState().outbox).toHaveLength(2);
+      expect(send).not.toHaveBeenCalled();
+
+      setOnline(true);
+      await store.getState().flushOutbox();
+
+      expect(send.mock.calls.map(([message]) => message.text)).toEqual(['First', 'Second']);
+      expect(queued.map((m) => store.getState().messages[m.id]?.status)).toEqual(['sent', 'sent']);
+      expect(store.getState().outbox).toEqual([]);
+      expect(realtime.send).toHaveBeenCalledTimes(2);
+    });
   });
 });

@@ -47,6 +47,9 @@ export interface MessagesSlice {
   /** Optimistic: shows instantly as "sending", ends as "sent" or "failed". Never throws. */
   sendMessage: (conversationId: string, text: string, replyToId?: string) => Promise<void>;
   retryMessage: (messageId: string) => Promise<void>;
+  /** Messages written while offline, sent in order once the browser is back online. */
+  outbox: string[];
+  flushOutbox: () => Promise<void>;
   /** Optimistic with rollback. Throw on failure so the UI can show feedback. */
   editMessage: (messageId: string, text: string) => Promise<void>;
   deleteMessage: (messageId: string) => Promise<void>;
