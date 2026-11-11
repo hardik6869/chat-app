@@ -50,8 +50,24 @@ export const Button = memo(function Button({ size = 'md', variant = 'primary', c
 });
 ```
 
-## 4. Rules
-- Colors come from tokens only (`bg-surface`, `text-muted`, `border-border`, `bg-bubble-out`). No hex values.
+## 4. Look & layout (simple, professional, colored)
+- Palette: indigo brand (`primary`), teal accent (`accent`), soft tinted neutrals (`bg`, `surface`,
+  `surface-muted`, `surface-active`). Not black-and-white; no gradients, one shadow level (`shadow-sm`).
+- Chat canvas is `bg-surface-muted`; my bubbles `bg-bubble-out text-primary-fg`; others `bg-bubble-in`.
+- Fixed rhythm: 64 px headers, 72 px conversation rows, 44 px list avatars, 20 px icons (16 px in meta),
+  4 px spacing grid (2/3/4/6), radius `md` controls / `lg` bubbles / `full` avatars and badges.
+- No wasted space: bubbles ≤ 75 % width, message column ≤ 880 px, one-line ellipsis previews,
+  message actions in one compact pill shown on hover/focus/long-press.
+
+## 5. WCAG 2.2 AA (required)
+- Only use token pairs from the design system (all ≥ 4.5:1 text, ≥ 3:1 UI). Inputs use `border-strong`.
+- Never color alone: unread = bold + badge, online = dot + text, status ticks have `aria-label`.
+- Targets ≥ 40 px (44 px on touch). Visible `focus-visible:ring-2 ring-focus ring-offset-2`.
+- Live updates (`aria-live="polite"`): new messages, typing, toasts. Respect `motion-reduce:`.
+- Add a `vitest-axe` assertion (`expect(await axe(container)).toHaveNoViolations()`) to organism tests.
+
+## 6. Rules
+- Colors come from tokens only (`bg-surface`, `text-text-muted`, `border-border`, `bg-bubble-out`). No hex values.
 - Sizes are `sm | md | lg`; variants are named the same way across atoms.
 - Mobile first: base classes target phones, then `md:` (tablet) and `xl:` (desktop).
 - Accessibility: icon-only buttons need `aria-label`; lists use `role="list"`; overlays close on Esc and
@@ -60,7 +76,7 @@ export const Button = memo(function Button({ size = 'md', variant = 'primary', c
 - Pass callbacks as stable props (`useCallback` in the hook). Wrap list items in `memo`.
 - No business logic in components. Derive state in hooks or selectors.
 
-## 5. Test
+## 7. Test
 Use `@testing-library/react` + `user-event`. Test behavior (what the user sees and does), not class names.
 ```tsx
 it('calls onClick', async () => {
