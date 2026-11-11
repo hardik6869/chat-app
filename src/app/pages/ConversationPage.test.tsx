@@ -1,7 +1,7 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router';
-import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Toaster } from '@/shared/ui';
 import { useChatStore } from '@/store';
 import { expectNoA11yViolations, mockLayout } from '@/test';
@@ -79,6 +79,22 @@ describe('Group info', () => {
     expect(await screen.findByText('Added Ava Patel')).toBeInTheDocument();
     expect(panel.getByText('Ava Patel')).toBeInTheDocument();
     expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('reports a failed member change', async () => {
+    const realAdd = useChatStore.getState().addMember;
+    useChatStore.setState({ addMember: vi.fn().mockRejectedValue(new Error('offline')) });
+    renderAt('/c/c-trip');
+    const panel = within(await openInfo());
+
+    await userEvent.click(panel.getByRole('button', { name: 'Add member' }));
+    const dialog = within(screen.getByRole('dialog', { name: 'Add member' }));
+    await userEvent.selectOptions(dialog.getByRole('combobox', { name: 'Person' }), 'Priya Sharma');
+    await userEvent.click(dialog.getByRole('button', { name: 'Add' }));
+
+    expect(await screen.findByText("Couldn't add Priya Sharma")).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Add member' })).toBeInTheDocument();
+    useChatStore.setState({ addMember: realAdd });
   });
 
   it('closes with Escape and returns focus to the button', async () => {

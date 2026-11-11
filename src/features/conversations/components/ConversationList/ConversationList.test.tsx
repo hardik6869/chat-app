@@ -74,6 +74,41 @@ describe('ConversationList', () => {
     expect(rowFor('Sofia Garcia')).not.toHaveTextContent('typing…');
   });
 
+  it('names attachments when there is no text, and who is typing in groups', () => {
+    act(() => {
+      useChatStore.setState((state) => {
+        const sofia = state.conversations['c-sofia'];
+        if (!sofia?.lastMessage) return {};
+        const file = {
+          id: 'f',
+          name: 'menu.pdf',
+          type: 'application/pdf',
+          size: 10,
+          url: 'blob:f',
+        };
+        return {
+          conversations: {
+            ...state.conversations,
+            'c-sofia': {
+              ...sofia,
+              lastMessage: { ...sofia.lastMessage, text: '', attachments: [file] },
+            },
+          },
+        };
+      });
+      useChatStore.getState().handleRealtimeEvent({
+        type: 'typing',
+        conversationId: 'c-trip',
+        userId: 'ethan',
+        isTyping: true,
+      });
+    });
+    renderList();
+
+    expect(rowFor('Sofia Garcia')).toHaveTextContent('📎 menu.pdf');
+    expect(rowFor('Weekend Trip')).toHaveTextContent('Ethan is typing…');
+  });
+
   it('marks the open conversation as the current page', () => {
     renderList('/c/c-priya');
 

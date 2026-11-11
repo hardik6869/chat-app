@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { describe, expect, it } from 'vitest';
 import { expectNoA11yViolations } from '@/test';
+import { App } from './App';
 import { routes } from './routes';
 
 function renderAt(path: string) {
@@ -55,5 +56,14 @@ describe('App routes', () => {
     await screen.findByRole('heading', { name: 'Ava Patel' });
 
     await expectNoA11yViolations(container);
+  });
+});
+
+describe('App', () => {
+  it('boots the real browser router, error boundary and toaster', async () => {
+    render(<App />);
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Chats' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Notifications' })).toBeInTheDocument();
   });
 });
