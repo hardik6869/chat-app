@@ -34,6 +34,11 @@ export default defineConfig([
       '@typescript-eslint/consistent-type-imports': ['error', { fixStyle: 'inline-type-imports' }],
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/restrict-template-expressions': ['error', { allowNumber: true }],
+      // This app doesn't use the React Compiler; the rule only flags libraries it would skip
+      // (e.g. TanStack Virtual), which is not a defect here.
+      'react-hooks/incompatible-library': 'off',
+      // Scrollable regions must be keyboard-focusable (WCAG 2.1.1, axe scrollable-region-focusable).
+      'jsx-a11y-x/no-noninteractive-tabindex': ['error', { roles: ['tabpanel', 'region'] }],
     },
   },
   {
