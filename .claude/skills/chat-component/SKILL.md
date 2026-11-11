@@ -38,7 +38,7 @@ const sizes = {
   lg: 'h-12 px-4 text-base',
 } as const;
 const variants = {
-  primary: 'bg-primary text-primary-fg hover:bg-primary/90',
+  primary: 'bg-primary text-primary-fg hover:bg-primary-hover',
   ghost: 'bg-transparent text-text hover:bg-surface-muted',
 } as const;
 
@@ -57,7 +57,7 @@ export const Button = memo(function Button({
     <button
       type="button"
       className={cn(
-        'inline-flex items-center gap-2 rounded-md focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50',
+        'inline-flex items-center gap-2 rounded-md disabled:opacity-50',
         sizes[size],
         variants[variant],
         className,
@@ -82,7 +82,7 @@ export const Button = memo(function Button({
 
 - Only use token pairs from the design system (all ≥ 4.5:1 text, ≥ 3:1 UI). Inputs use `border-strong`.
 - Never color alone: unread = bold + badge, online = dot + text, status ticks have `aria-label`.
-- Targets ≥ 40 px (44 px on touch). Visible `focus-visible:ring-2 ring-focus ring-offset-2`.
+- Targets ≥ 40 px (44 px on touch). Focus ring is global (`:focus-visible` in `styles.css`); never remove outlines.
 - Live updates (`aria-live="polite"`): new messages, typing, toasts. Respect `motion-reduce:`.
 - Add a `vitest-axe` assertion (`expect(await axe(container)).toHaveNoViolations()`) to organism tests.
 
