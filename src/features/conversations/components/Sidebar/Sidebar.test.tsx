@@ -85,6 +85,21 @@ describe('Sidebar search and filters', () => {
     expect(screen.getByRole('searchbox')).toHaveAttribute('aria-keyshortcuts', 'Control+K Meta+K');
   });
 
+  it('moves between conversations with the arrow keys, Home and End', async () => {
+    renderSidebar();
+    const links = screen.getAllByRole('link');
+    links[0]?.focus();
+
+    await userEvent.keyboard('{ArrowDown}');
+    expect(links[1]).toHaveFocus();
+    await userEvent.keyboard('{End}');
+    expect(links.at(-1)).toHaveFocus();
+    await userEvent.keyboard('{ArrowUp}');
+    expect(links.at(-2)).toHaveFocus();
+    await userEvent.keyboard('{Home}');
+    expect(links[0]).toHaveFocus();
+  });
+
   it('has no accessibility violations', async () => {
     const { container } = render(
       <MemoryRouter>

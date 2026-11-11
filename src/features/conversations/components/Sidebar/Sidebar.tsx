@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
+import { useArrowNavigation } from '@/shared/hooks';
 import type { ConversationFilter } from '@/store';
 import { Avatar, ChipGroup, SearchInput, Skeleton } from '@/shared/ui';
 import { useConversationFilters, useCurrentUser } from '../../hooks';
@@ -18,6 +19,8 @@ interface SidebarProps {
 /** Sidebar: 64 px header, search + filters, then the scrollable conversation list. */
 export function Sidebar({ actions }: SidebarProps) {
   const currentUser = useCurrentUser();
+  const listRef = useRef<HTMLDivElement>(null);
+  useArrowNavigation(listRef, 'a[href]');
   const { query, setQuery, debouncedQuery, filter, setFilter, searchRef } =
     useConversationFilters();
 
@@ -48,7 +51,7 @@ export function Sidebar({ actions }: SidebarProps) {
           onChange={setFilter}
         />
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div ref={listRef} className="min-h-0 flex-1 overflow-y-auto">
         <ConversationList filter={filter} query={debouncedQuery} />
       </div>
     </div>

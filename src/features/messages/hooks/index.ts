@@ -9,6 +9,7 @@ export { useLongPressMenu } from './useLongPressMenu';
 export { useMessage } from './useMessage';
 export { useMessageActions } from './useMessageActions';
 export { useMessageSearch } from './useMessageSearch';
+export { useNewMessageAnnouncer } from './useNewMessageAnnouncer';
 export { useQuotedMessage } from './useQuotedMessage';
 export { useReactions } from './useReactions';
 export { useThread } from './useThread';

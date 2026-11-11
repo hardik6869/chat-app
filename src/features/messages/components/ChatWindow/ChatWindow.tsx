@@ -4,7 +4,7 @@ import { Link } from 'react-router';
 import { cn } from '@/shared/lib';
 import { useKeyboardShortcut } from '@/shared/hooks';
 import { buttonBase, buttonVariants, EmptyState, ErrorBoundary, IconButton } from '@/shared/ui';
-import { useActiveConversation } from '../../hooks';
+import { useActiveConversation, useNewMessageAnnouncer } from '../../hooks';
 import { ChatHeader } from '../ChatHeader';
 import { Composer } from '../Composer';
 import { DeleteMessageDialog } from '../DeleteMessageDialog';
@@ -23,6 +23,7 @@ interface ChatWindowProps {
 /** One open conversation: header, messages and composer, plus optional side panel. */
 export function ChatWindow({ conversationId, headerActions, aside }: ChatWindowProps) {
   const { notFound } = useActiveConversation(conversationId);
+  const announcement = useNewMessageAnnouncer(conversationId);
   const [searchOpen, setSearchOpen] = useState(false);
   const searchButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -80,6 +81,10 @@ export function ChatWindow({ conversationId, headerActions, aside }: ChatWindowP
           </div>
           <Composer conversationId={conversationId} />
           <DeleteMessageDialog />
+          {/* Screen readers hear incoming messages in the open chat (WCAG 4.1.3). */}
+          <p aria-live="polite" className="sr-only">
+            {announcement}
+          </p>
         </ErrorBoundary>
       </div>
       {aside}
