@@ -15,6 +15,7 @@ describe('Composer', () => {
 
   beforeAll(async () => {
     await useChatStore.getState().bootstrap();
+    await useChatStore.getState().loadMessages(CONVERSATION);
   });
 
   beforeEach(() => {
@@ -79,6 +80,14 @@ describe('Composer', () => {
       screen.getByText(`${MAX_MESSAGE_LENGTH - 100} / ${MAX_MESSAGE_LENGTH}`),
     ).toBeInTheDocument();
     expect(field()).toHaveAttribute('maxLength', String(MAX_MESSAGE_LENGTH));
+  });
+
+  it('stays disabled until the conversation has loaded', () => {
+    render(<Composer conversationId="c-noah" />);
+
+    expect(field()).toBeDisabled();
+    expect(field()).toHaveAttribute('placeholder', 'Loading messages…');
+    expect(sendButton()).toBeDisabled();
   });
 
   it('explains the keyboard shortcuts and has no accessibility violations', async () => {

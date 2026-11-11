@@ -68,7 +68,7 @@ export function ErrorState({
       className={className}
       action={
         onRetry && (
-          <Button variant="secondary" size="sm" onClick={onRetry}>
+          <Button size="sm" onClick={onRetry}>
             Try again
           </Button>
         )

@@ -26,6 +26,9 @@ export function useComposer(conversationId: string) {
   const target = useChatStore((state) => state.composerTargets[conversationId]);
   const setComposerTarget = useChatStore((state) => state.setComposerTarget);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  // Writing is only possible once the conversation's messages have loaded.
+  const threadStatus = useChatStore((state) => state.threads[conversationId]?.status ?? 'idle');
+  const isReady = threadStatus === 'success';
   const isEditing = target?.mode === 'edit';
 
   const { register, handleSubmit, reset, setFocus, control } = useForm<ComposerValues>({
@@ -59,7 +62,7 @@ export function useComposer(conversationId: string) {
   });
 
   const submit = handleSubmit(({ text: value }) => {
-    if (!value.trim()) return;
+    if (!value.trim() || !isReady) return;
     if (target?.mode === 'edit') {
       const original = useChatStore.getState().messages[target.messageId]?.text;
       cancelTarget();
@@ -113,7 +116,13 @@ export function useComposer(conversationId: string) {
     },
     onKeyDown,
     onSubmit: submit,
-    canSend: text.trim().length > 0,
+    isReady,
+    placeholder: isReady
+      ? 'Write a message…'
+      : threadStatus === 'error'
+        ? "Messages couldn't load"
+        : 'Loading messages…',
+    canSend: isReady && text.trim().length > 0,
     length: text.length,
     showCounter: text.length >= COUNTER_THRESHOLD,
     maxLength: MAX_MESSAGE_LENGTH,

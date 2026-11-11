@@ -15,6 +15,8 @@ export function Composer({ conversationId }: { conversationId: string }) {
     onKeyDown,
     onSubmit,
     canSend,
+    isReady,
+    placeholder,
     length,
     showCounter,
     maxLength,
@@ -34,7 +36,8 @@ export function Composer({ conversationId }: { conversationId: string }) {
           {...textareaProps}
           aria-label="Message"
           aria-describedby={hintId}
-          placeholder="Write a message…"
+          placeholder={placeholder}
+          disabled={!isReady}
           onKeyDown={onKeyDown}
           className="max-h-40 overflow-y-auto"
         />
