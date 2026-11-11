@@ -60,6 +60,9 @@ export interface UiSlice {
   /** Reply/edit target per conversation (not persisted). */
   composerTargets: Record<string, ComposerTarget>;
   setComposerTarget: (conversationId: string, target?: ComposerTarget) => void;
+  /** Message waiting for delete confirmation. */
+  pendingDeleteId?: string;
+  setPendingDelete: (messageId?: string) => void;
 }
 
 export type ChatState = SessionSlice & MessagesSlice & RealtimeSlice & UiSlice;

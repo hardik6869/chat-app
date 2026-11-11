@@ -6,6 +6,7 @@ const without = <T>(record: Record<string, T>, key: string) =>
 export const createUiSlice: SliceCreator<UiSlice> = (set) => ({
   drafts: {},
   composerTargets: {},
+  pendingDeleteId: undefined,
 
   setDraft(conversationId, text) {
     set((state) => ({
@@ -21,5 +22,9 @@ export const createUiSlice: SliceCreator<UiSlice> = (set) => ({
         ? { ...state.composerTargets, [conversationId]: target }
         : without(state.composerTargets, conversationId),
     }));
+  },
+
+  setPendingDelete(messageId) {
+    set({ pendingDeleteId: messageId });
   },
 });

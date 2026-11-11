@@ -1,4 +1,4 @@
-import { Reply } from 'lucide-react';
+import { Copy, Pencil, Reply, Trash2 } from 'lucide-react';
 import { cn } from '@/shared/lib';
 import { IconButton } from '@/shared/ui';
 import { useMessageActions } from '../../hooks';
@@ -9,11 +9,12 @@ interface MessageActionsProps {
 }
 
 /**
- * Compact action pill. It's hidden until the message is hovered or anything inside gets
- * keyboard focus, so it stays reachable with Tab while keeping the thread uncluttered.
+ * Compact action pill. It's hidden until the message is hovered, long-pressed or anything
+ * inside gets keyboard focus, so it stays reachable with Tab while keeping the thread clean.
  */
 export function MessageActions({ messageId, className }: MessageActionsProps) {
-  const { reply } = useMessageActions(messageId);
+  const { reply, edit, copy, requestDelete, canCopy, canEdit, canDelete } =
+    useMessageActions(messageId);
 
   return (
     <div
@@ -26,6 +27,18 @@ export function MessageActions({ messageId, className }: MessageActionsProps) {
       )}
     >
       <IconButton icon={Reply} label="Reply" size="sm" onClick={reply} />
+      {canCopy && (
+        <IconButton
+          icon={Copy}
+          label="Copy text"
+          size="sm"
+          onClick={() => {
+            void copy();
+          }}
+        />
+      )}
+      {canEdit && <IconButton icon={Pencil} label="Edit" size="sm" onClick={edit} />}
+      {canDelete && <IconButton icon={Trash2} label="Delete" size="sm" onClick={requestDelete} />}
     </div>
   );
 }

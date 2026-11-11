@@ -1,4 +1,4 @@
-import { SendHorizontal } from 'lucide-react';
+import { Check, SendHorizontal } from 'lucide-react';
 import { useId } from 'react';
 import { cn } from '@/shared/lib';
 import { IconButton, Textarea } from '@/shared/ui';
@@ -10,6 +10,7 @@ export function Composer({ conversationId }: { conversationId: string }) {
   const {
     target,
     cancelTarget,
+    isEditing,
     textareaProps,
     onKeyDown,
     onSubmit,
@@ -38,8 +39,8 @@ export function Composer({ conversationId }: { conversationId: string }) {
           className="max-h-40 overflow-y-auto"
         />
         <IconButton
-          icon={SendHorizontal}
-          label="Send message"
+          icon={isEditing ? Check : SendHorizontal}
+          label={isEditing ? 'Save changes' : 'Send message'}
           variant="primary"
           type="submit"
           disabled={!canSend}

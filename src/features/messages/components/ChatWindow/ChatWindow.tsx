@@ -5,6 +5,7 @@ import { buttonBase, buttonVariants, EmptyState, ErrorBoundary } from '@/shared/
 import { useActiveConversation } from '../../hooks';
 import { ChatHeader } from '../ChatHeader';
 import { Composer } from '../Composer';
+import { DeleteMessageDialog } from '../DeleteMessageDialog';
 import { MessageList } from '../MessageList';
 import { TypingIndicator } from '../TypingIndicator';
 
@@ -37,6 +38,7 @@ export function ChatWindow({ conversationId }: { conversationId: string }) {
           <TypingIndicator conversationId={conversationId} />
         </div>
         <Composer conversationId={conversationId} />
+        <DeleteMessageDialog />
       </ErrorBoundary>
     </div>
   );
