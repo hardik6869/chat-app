@@ -184,3 +184,5 @@ export function createRealtimeSimulator(db: Database, options: SimulatorOptions 
     },
   };
 }
+
+export type RealtimeClient = ReturnType<typeof createRealtimeSimulator>;

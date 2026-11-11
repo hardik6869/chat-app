@@ -188,3 +188,5 @@ export function createChatApi({
       }),
   };
 }
+
+export type ChatApi = ReturnType<typeof createChatApi>;
