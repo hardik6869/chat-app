@@ -3,9 +3,13 @@ import { createSeed, type Seed } from '../mock-data';
 
 /**
  * In-memory "server" storage shared by the mock API and the realtime simulator.
- * Writers call `touch()` after a change so persistence can save.
+ * Writers call `touch(conversationId)` after changing that chat's messages, or `touch()` for
+ * other changes (read state, members, presence), so persistence saves only what changed.
  */
-export function createDatabase(seed: Seed = createSeed(), onChange: () => void = () => undefined) {
+export function createDatabase(
+  seed: Seed = createSeed(),
+  onChange: (conversationId?: string) => void = () => undefined,
+) {
   return {
     currentUserId: seed.currentUserId,
     users: new Map<string, User>(seed.users.map((user) => [user.id, user])),

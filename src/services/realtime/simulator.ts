@@ -67,7 +67,7 @@ export function createRealtimeSimulator(db: Database, options: SimulatorOptions 
     messages[index] = next;
     const conversation = db.conversations.get(message.conversationId);
     if (conversation?.lastMessage?.id === next.id) conversation.lastMessage = next;
-    db.touch();
+    db.touch(message.conversationId);
     emit({
       type: 'message:status',
       conversationId: message.conversationId,
@@ -89,7 +89,7 @@ export function createRealtimeSimulator(db: Database, options: SimulatorOptions 
     db.messages.get(conversation.id)?.push(message);
     conversation.lastMessage = message;
     conversation.unreadCount += 1;
-    db.touch();
+    db.touch(conversation.id);
     emit({ type: 'typing', conversationId: conversation.id, userId: senderId, isTyping: false });
     emit({ type: 'message:new', message });
   }

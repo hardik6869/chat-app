@@ -3,7 +3,8 @@ import { setErrorReporter } from '@/shared/lib';
 import { createChatApi } from '../api';
 import { createPersistentDatabase } from './index';
 
-const KEY = 'chat-app:db';
+const META_KEY = 'chat-app:db:v2';
+const messagesKey = (id: string) => `${META_KEY}:messages:${id}`;
 
 function memoryStorage(initial: Record<string, string> = {}) {
   const data = new Map(Object.entries(initial));
@@ -13,8 +14,14 @@ function memoryStorage(initial: Record<string, string> = {}) {
     setItem: vi.fn((key: string, value: string) => {
       data.set(key, value);
     }),
+    removeItem: vi.fn((key: string) => {
+      data.delete(key);
+    }),
   };
 }
+
+const writtenKeys = (storage: ReturnType<typeof memoryStorage>) =>
+  storage.setItem.mock.calls.map(([key]) => key);
 
 describe('createPersistentDatabase', () => {
   beforeEach(() => {
@@ -32,27 +39,33 @@ describe('createPersistentDatabase', () => {
     expect(db.messages.get('c-engineering')).toHaveLength(10_000);
   });
 
-  it('saves once, shortly after a burst of changes, and restores on the next load', async () => {
+  it('saves only the small meta record for changes like read state', async () => {
+    const storage = memoryStorage();
+    const { db } = createPersistentDatabase({ storage, saveDelayMs: 500 });
+
+    await createChatApi({ db, latencyMs: 0 }).markAsRead('c-ava');
+    vi.advanceTimersByTime(500);
+
+    expect(writtenKeys(storage)).toEqual([META_KEY]);
+  });
+
+  it('saves the changed conversation only, once per burst, and restores it later', async () => {
     const storage = memoryStorage();
     const { db } = createPersistentDatabase({ storage, saveDelayMs: 500 });
     const api = createChatApi({ db, latencyMs: 0 });
 
-    const sendPromise = api.sendMessage({
-      id: 'msg_saved',
-      conversationId: 'c-ava',
-      text: 'Saved',
-    });
-    await vi.advanceTimersByTimeAsync(0);
-    await sendPromise;
+    await api.sendMessage({ id: 'msg_saved', conversationId: 'c-ava', text: 'Saved' });
     await api.markAsRead('c-ava');
     expect(storage.setItem).not.toHaveBeenCalled();
-
     vi.advanceTimersByTime(500);
-    expect(storage.setItem).toHaveBeenCalledOnce();
+
+    expect(writtenKeys(storage).sort()).toEqual([META_KEY, messagesKey('c-ava')].sort());
 
     const reloaded = createPersistentDatabase({ storage }).db;
     expect(reloaded.messages.get('c-ava')?.at(-1)?.text).toBe('Saved');
     expect(reloaded.conversations.get('c-ava')?.unreadCount).toBe(0);
+    // Untouched chats come back from the deterministic seed, identical to before.
+    expect(reloaded.messages.get('c-engineering')).toEqual(db.messages.get('c-engineering'));
   });
 
   it('does not save after read-only requests', async () => {
@@ -76,17 +89,25 @@ describe('createPersistentDatabase', () => {
 
     persistence.db.touch();
     persistence.flush();
-    expect(storage.setItem).toHaveBeenCalledOnce();
+    expect(writtenKeys(storage)).toEqual([META_KEY]);
+  });
+
+  it('removes data saved in the old single-entry format', () => {
+    const storage = memoryStorage({ 'chat-app:db': '{"version":1}' });
+
+    createPersistentDatabase({ storage });
+
+    expect(storage.data.has('chat-app:db')).toBe(false);
   });
 
   it('re-seeds when the stored version is outdated', () => {
     const storage = memoryStorage({
-      [KEY]: JSON.stringify({
-        version: 0,
+      [META_KEY]: JSON.stringify({
+        version: 1,
+        seedNow: 0,
         currentUserId: 'me',
         users: [],
         conversations: [],
-        messagesByConversation: {},
       }),
     });
 
@@ -97,7 +118,9 @@ describe('createPersistentDatabase', () => {
     const reporter = vi.fn();
     const restore = setErrorReporter(reporter);
 
-    const { db } = createPersistentDatabase({ storage: memoryStorage({ [KEY]: '{not json' }) });
+    const { db } = createPersistentDatabase({
+      storage: memoryStorage({ [META_KEY]: '{not json' }),
+    });
 
     expect(db.conversations.size).toBeGreaterThan(0);
     expect(reporter).toHaveBeenCalledOnce();

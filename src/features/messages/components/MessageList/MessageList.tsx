@@ -23,7 +23,8 @@ export function MessageList({ conversationId }: { conversationId: string }) {
     getScrollElement: () => scrollRef.current,
     estimateSize: () => 64,
     getItemKey: (index) => rows[index]?.key ?? index,
-    overscan: 10,
+    // A few rows of buffer is enough for smooth scrolling; more rows cost first-render time.
+    overscan: 4,
     // Room below the last message for the floating typing indicator.
     paddingEnd: 48,
     scrollPaddingEnd: 48,

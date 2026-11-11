@@ -16,21 +16,24 @@ export function createChatApi({
   random = Math.random,
   isOnline = () => navigator.onLine,
 }: ChatApiOptions = {}) {
-  const me = db.currentUserId;
-
   /** Simulates the network, runs the handler and returns a copy. Writes trigger persistence. */
-  async function request<T>(handler: () => T, { write = false } = {}): Promise<T> {
+  async function request<T>(
+    handler: () => T,
+    { write = false, messagesOf }: { write?: boolean; messagesOf?: string } = {},
+  ): Promise<T> {
     if (latencyMs > 0) {
       await new Promise((resolve) => setTimeout(resolve, latencyMs * (0.5 + random())));
     }
     if (!isOnline()) throw new ApiError('NETWORK', 'You are offline');
     if (random() < failureRate) throw new ApiError('NETWORK', 'Network request failed');
     const result = structuredClone(handler());
-    if (write) db.touch();
+    if (write) db.touch(messagesOf);
     return result;
   }
 
-  const write = <T>(handler: () => T) => request(handler, { write: true });
+  /** A write; pass the conversation id when its messages change (for incremental saves). */
+  const write = <T>(handler: () => T, messagesOf?: string) =>
+    request(handler, { write: true, messagesOf });
 
   function getConversation(conversationId: string) {
     const conversation = db.conversations.get(conversationId);
@@ -59,7 +62,7 @@ export function createChatApi({
     const index = messages.findIndex((message) => message.id === messageId);
     const current = messages[index];
     if (!current) throw new ApiError('NOT_FOUND', 'Message not found');
-    if (ownOnly && !canEditMessage(current, me)) {
+    if (ownOnly && !canEditMessage(current, db.currentUserId)) {
       throw new ApiError('FORBIDDEN', 'You can only change your own messages');
     }
     const next = update(current);
@@ -78,7 +81,7 @@ export function createChatApi({
   return {
     fetchBootstrap: () =>
       request(() => ({
-        currentUserId: me,
+        currentUserId: db.currentUserId,
         users: [...db.users.values()],
         conversations: [...db.conversations.values()],
       })),
@@ -111,7 +114,7 @@ export function createChatApi({
         const message: Message = {
           id,
           conversationId,
-          senderId: me,
+          senderId: db.currentUserId,
           // A message may be only attachments.
           text: validateText(text, { allowEmpty: (attachments?.length ?? 0) > 0 }),
           createdAt: new Date().toISOString(),
@@ -123,7 +126,7 @@ export function createChatApi({
         messages.push(message);
         getConversation(conversationId).lastMessage = message;
         return message;
-      }),
+      }, conversationId),
 
     editMessage: (conversationId: string, messageId: string, text: string) =>
       write(() => {
@@ -133,26 +136,33 @@ export function createChatApi({
           text: nextText,
           editedAt: new Date().toISOString(),
         }));
-      }),
+      }, conversationId),
 
     deleteMessage: (conversationId: string, messageId: string) =>
-      write(() =>
-        updateMessage(conversationId, messageId, (message) => ({
-          ...message,
-          text: '',
-          reactions: [],
-          deletedAt: new Date().toISOString(),
-        })),
+      write(
+        () =>
+          updateMessage(conversationId, messageId, (message) => ({
+            ...message,
+            text: '',
+            reactions: [],
+            deletedAt: new Date().toISOString(),
+          })),
+        conversationId,
       ),
 
     toggleReaction: (conversationId: string, messageId: string, emoji: string) =>
-      write(() =>
-        updateMessage(
-          conversationId,
-          messageId,
-          (message) => ({ ...message, reactions: applyReaction(message.reactions, emoji, me) }),
-          { ownOnly: false },
-        ),
+      write(
+        () =>
+          updateMessage(
+            conversationId,
+            messageId,
+            (message) => ({
+              ...message,
+              reactions: applyReaction(message.reactions, emoji, db.currentUserId),
+            }),
+            { ownOnly: false },
+          ),
+        conversationId,
       ),
 
     markAsRead: (conversationId: string) =>
@@ -171,7 +181,8 @@ export function createChatApi({
     removeMember: (conversationId: string, userId: string) =>
       write(() => {
         const group = getGroup(conversationId);
-        if (userId === me) throw new ApiError('VALIDATION', 'You cannot remove yourself');
+        if (userId === db.currentUserId)
+          throw new ApiError('VALIDATION', 'You cannot remove yourself');
         group.memberIds = group.memberIds.filter((id) => id !== userId);
         group.adminIds = group.adminIds.filter((id) => id !== userId);
         return group;
