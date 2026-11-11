@@ -30,6 +30,7 @@
   --danger: #dc2626;
   --danger-fg: #ffffff;
   --focus: #4f46e5;
+  --overlay: rgb(15 23 42 / 0.5);
 
   --avatar-1-bg: #e0e7ff;
   --avatar-1-fg: #3730a3;
@@ -73,6 +74,7 @@
   --danger: #f87171;
   --danger-fg: #0b1020;
   --focus: #818cf8;
+  --overlay: rgb(0 0 0 / 0.6);
 
   --avatar-1-bg: #312e81;
   --avatar-1-fg: #c7d2fe;
