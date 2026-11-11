@@ -7,6 +7,7 @@ export const createUiSlice: SliceCreator<UiSlice> = (set) => ({
   drafts: {},
   composerTargets: {},
   pendingDeleteId: undefined,
+  focusedMessageId: undefined,
 
   setDraft(conversationId, text) {
     set((state) => ({
@@ -26,5 +27,9 @@ export const createUiSlice: SliceCreator<UiSlice> = (set) => ({
 
   setPendingDelete(messageId) {
     set({ pendingDeleteId: messageId });
+  },
+
+  focusMessage(messageId) {
+    set({ focusedMessageId: messageId });
   },
 });

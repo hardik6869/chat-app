@@ -21,8 +21,11 @@ export interface SessionSlice {
   /** Unread count captured when a chat is opened, to place the "unread" divider. */
   unreadMarkers: Record<string, number>;
   bootstrap: () => Promise<void>;
-  /** Opens a conversation: loads its messages and marks it read. */
-  setActiveConversation: (conversationId?: string) => void;
+  /**
+   * Opens a conversation: loads its messages and marks it read. `unreadMarker` is the unread
+   * count captured when the chat was opened, used to place the "unread" divider.
+   */
+  setActiveConversation: (conversationId?: string, unreadMarker?: number) => void;
   markAsRead: (conversationId: string) => Promise<void>;
   /** Throw on failure so the UI can show feedback. */
   addMember: (conversationId: string, userId: string) => Promise<void>;
@@ -41,6 +44,8 @@ export interface MessagesSlice {
   editMessage: (messageId: string, text: string) => Promise<void>;
   deleteMessage: (messageId: string) => Promise<void>;
   toggleReaction: (messageId: string, emoji: string) => Promise<void>;
+  /** Server-side search across the whole conversation, newest first. */
+  searchMessages: (conversationId: string, query: string) => Promise<Message[]>;
 }
 
 export interface RealtimeSlice {
@@ -65,6 +70,9 @@ export interface UiSlice {
   /** Message waiting for delete confirmation. */
   pendingDeleteId?: string;
   setPendingDelete: (messageId?: string) => void;
+  /** Message to scroll to and highlight (e.g. a search result). */
+  focusedMessageId?: string;
+  focusMessage: (messageId?: string) => void;
 }
 
 export type ChatState = SessionSlice & MessagesSlice & RealtimeSlice & UiSlice;

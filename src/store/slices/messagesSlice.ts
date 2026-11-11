@@ -141,6 +141,8 @@ export const createMessagesSlice: SliceCreator<MessagesSlice> = (set, get, { api
         (message) => api.deleteMessage(message.conversationId, messageId),
       ),
 
+    searchMessages: (conversationId, query) => api.searchMessages(conversationId, query),
+
     toggleReaction: (messageId, emoji) =>
       optimistic(
         messageId,

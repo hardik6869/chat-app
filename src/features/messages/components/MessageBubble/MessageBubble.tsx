@@ -3,6 +3,7 @@ import { memo, useRef } from 'react';
 import { MessageStatusIcon } from '@/entities';
 import { cn, formatTime } from '@/shared/lib';
 import { Avatar } from '@/shared/ui';
+import { useChatStore } from '@/store';
 import { useLongPressMenu, useMessage } from '../../hooks';
 import { MessageActions } from '../MessageActions';
 import { QuotedMessage } from '../QuotedMessage';
@@ -26,6 +27,7 @@ export const MessageBubble = memo(function MessageBubble({
   const { message, sender, retry } = useMessage(messageId);
   const rowRef = useRef<HTMLDivElement>(null);
   const actionsOpen = useLongPressMenu(rowRef);
+  const isFocused = useChatStore((state) => state.focusedMessageId === messageId);
   if (!message) return null;
   const deleted = message.deletedAt !== undefined;
   const withSender = showSender && !isOwn;
@@ -59,6 +61,8 @@ export const MessageBubble = memo(function MessageBubble({
             'max-w-full min-w-16 rounded-lg px-3 py-2',
             isOwn ? 'bg-bubble-out text-primary-fg' : 'bg-bubble-in text-text',
             isFirstInGroup && (isOwn ? 'rounded-tr-sm' : 'rounded-tl-sm'),
+            // Briefly ring the message the reader jumped to (e.g. from search).
+            isFocused && 'ring-2 ring-focus ring-offset-2 ring-offset-surface-muted',
           )}
         >
           {withSender && isFirstInGroup && (

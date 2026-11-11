@@ -1,11 +1,18 @@
 import { ArrowLeft } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { Link } from 'react-router';
 import { cn } from '@/shared/lib';
 import { Avatar, buttonBase, buttonVariants, Skeleton } from '@/shared/ui';
 import { useConversationHeader } from '../../hooks';
 
-/** 64 px header: back link (mobile only), avatar, title and presence/members line. */
-export function ChatHeader({ conversationId }: { conversationId: string }) {
+interface ChatHeaderProps {
+  conversationId: string;
+  /** Buttons on the right (search, group info). */
+  actions?: ReactNode;
+}
+
+/** 64 px header: back link (mobile only), avatar, title, presence/members line and actions. */
+export function ChatHeader({ conversationId, actions }: ChatHeaderProps) {
   const header = useConversationHeader(conversationId);
 
   return (
@@ -28,6 +35,7 @@ export function ChatHeader({ conversationId }: { conversationId: string }) {
       ) : (
         <Skeleton className="h-10 w-48" />
       )}
+      {actions}
     </header>
   );
 }

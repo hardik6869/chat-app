@@ -2,7 +2,7 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { MessageCircle } from 'lucide-react';
 import { useCallback, useLayoutEffect, useRef } from 'react';
 import { EmptyState, ErrorState } from '@/shared/ui';
-import { useAutoScroll, useLoadOlderMessages, useThread } from '../../hooks';
+import { useAutoScroll, useFocusMessage, useLoadOlderMessages, useThread } from '../../hooks';
 import { JumpToLatest } from '../JumpToLatest';
 import { MessageListSkeleton } from './MessageListSkeleton';
 import { OlderMessagesStatus } from './OlderMessagesStatus';
@@ -58,6 +58,7 @@ export function MessageList({ conversationId }: { conversationId: string }) {
     loadOlder,
     enabled: ready,
   });
+  useFocusMessage({ virtualizer, rows, hasMore, olderStatus, loadOlder });
 
   if (status === 'error') {
     return <ErrorState title="Couldn't load messages" onRetry={retry} className="h-full" />;

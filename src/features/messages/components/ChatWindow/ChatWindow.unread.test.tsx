@@ -1,7 +1,9 @@
-import { screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { useChatStore } from '@/store';
 import { mockLayout, renderChat } from '@/test';
+import { ChatWindow } from './ChatWindow';
 
 describe('Unread divider', () => {
   beforeAll(async () => {
@@ -24,6 +26,19 @@ describe('Unread divider', () => {
       expect(useChatStore.getState().conversations['c-design']?.unreadCount).toBe(0);
     });
     expect(screen.getByText('3 unread messages')).toBeInTheDocument();
+  });
+
+  it('keeps the divider under StrictMode, where effects run twice', async () => {
+    expect(useChatStore.getState().conversations['c-priya']?.unreadCount).toBe(1);
+
+    render(
+      <MemoryRouter>
+        <ChatWindow conversationId="c-priya" />
+      </MemoryRouter>,
+      { reactStrictMode: true },
+    );
+
+    expect(await screen.findByText('1 unread message')).toBeInTheDocument();
   });
 
   it('shows no divider when everything was already read', async () => {

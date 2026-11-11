@@ -29,12 +29,11 @@ export const createSessionSlice: SliceCreator<SessionSlice> = (set, get, { api }
     }
   },
 
-  setActiveConversation(conversationId) {
-    const unread = conversationId ? (get().conversations[conversationId]?.unreadCount ?? 0) : 0;
+  setActiveConversation(conversationId, unreadMarker = 0) {
     set({
       activeConversationId: conversationId,
-      // Remember where unread messages start before they are marked read.
-      unreadMarkers: conversationId && unread > 0 ? { [conversationId]: unread } : {},
+      focusedMessageId: undefined,
+      unreadMarkers: conversationId && unreadMarker > 0 ? { [conversationId]: unreadMarker } : {},
     });
     if (!conversationId) return;
     void get().loadMessages(conversationId);
