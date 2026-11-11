@@ -1,5 +1,5 @@
 import { Search, X } from 'lucide-react';
-import { useRef, type ComponentProps } from 'react';
+import { useRef, type ComponentProps, type RefObject } from 'react';
 import { cn } from '@/shared/lib';
 import { IconButton, Input } from '../../atoms';
 
@@ -11,6 +11,8 @@ export interface SearchInputProps extends Omit<
   onValueChange: (value: string) => void;
   /** Accessible name of the field. */
   label: string;
+  /** Lets a parent focus the field, e.g. from a keyboard shortcut. */
+  ref?: RefObject<HTMLInputElement | null>;
 }
 
 /** Search field with icon, clear button and Esc-to-clear. Focus stays in the field after clearing. */
@@ -19,9 +21,11 @@ export function SearchInput({
   onValueChange,
   label,
   className,
+  ref,
   ...props
 }: SearchInputProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const ownRef = useRef<HTMLInputElement>(null);
+  const inputRef = ref ?? ownRef;
 
   const clear = () => {
     onValueChange('');
