@@ -1,35 +1,20 @@
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { MessageCircle } from 'lucide-react';
 import { useCallback, useLayoutEffect, useRef } from 'react';
-import { EmptyState, ErrorState, Skeleton } from '@/shared/ui';
-import { useAutoScroll, useThread } from '../../hooks';
-import { DateSeparator } from '../DateSeparator';
+import { EmptyState, ErrorState } from '@/shared/ui';
+import { useAutoScroll, useLoadOlderMessages, useThread } from '../../hooks';
 import { JumpToLatest } from '../JumpToLatest';
-import { MessageBubble } from '../MessageBubble';
-
-function MessageListSkeleton() {
-  const widths = ['w-2/5', 'w-1/3', 'w-1/2', 'w-1/4', 'w-2/5'];
-  return (
-    <div
-      role="status"
-      aria-label="Loading messages"
-      className="mx-auto w-full max-w-220 space-y-3 p-6"
-    >
-      {widths.map((width, index) => (
-        <div key={index} className={index % 2 ? 'flex justify-end' : 'flex'}>
-          <Skeleton className={`h-12 ${width} rounded-lg bg-surface`} />
-        </div>
-      ))}
-    </div>
-  );
-}
+import { MessageListSkeleton } from './MessageListSkeleton';
+import { OlderMessagesStatus } from './OlderMessagesStatus';
+import { ThreadRowView } from './ThreadRowView';
 
 /**
  * Virtualized thread: only visible rows are in the DOM, so 10,000+ messages stay smooth.
- * Rows are measured after render because message heights vary.
+ * Rows are measured after render because message heights vary. Older pages load on scroll.
  */
 export function MessageList({ conversationId }: { conversationId: string }) {
-  const { status, rows, isGroup, retry } = useThread(conversationId);
+  const { status, rows, isGroup, retry, hasMore, olderStatus, loadOlder } =
+    useThread(conversationId);
   const scrollRef = useRef<HTMLDivElement>(null);
   const didInitialScroll = useRef(false);
 
@@ -61,6 +46,14 @@ export function MessageList({ conversationId }: { conversationId: string }) {
     scrollRef,
     rows,
     scrollToBottom,
+    enabled: ready,
+  });
+  useLoadOlderMessages({
+    scrollRef,
+    virtualizer,
+    rows,
+    canLoad: hasMore && olderStatus !== 'loading',
+    loadOlder,
     enabled: ready,
   });
 
@@ -107,21 +100,13 @@ export function MessageList({ conversationId }: { conversationId: string }) {
                 className="absolute top-0 left-0 w-full px-3 md:px-6"
                 style={{ transform: `translateY(${item.start}px)` }}
               >
-                {row.type === 'date' ? (
-                  <DateSeparator date={row.date} />
-                ) : (
-                  <MessageBubble
-                    messageId={row.messageId}
-                    isOwn={row.isOwn}
-                    isFirstInGroup={row.isFirstInGroup}
-                    showSender={isGroup}
-                  />
-                )}
+                <ThreadRowView row={row} isGroup={isGroup} />
               </div>
             );
           })}
         </div>
       </div>
+      <OlderMessagesStatus status={olderStatus} onRetry={loadOlder} />
       {!atBottom && <JumpToLatest unseenCount={unseenCount} onClick={scrollToBottom} />}
     </div>
   );

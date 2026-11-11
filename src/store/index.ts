@@ -9,4 +9,4 @@ export const startRealtime = () => connectRealtime(useChatStore, realtime);
 
 export { selectConversationList, selectThreadMessages, selectTypingNames } from './selectors';
 export type { ConversationFilter } from './selectors';
-export type { ComposerTarget } from './types';
+export type { ComposerTarget, LoadStatus } from './types';

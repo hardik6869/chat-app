@@ -2,7 +2,7 @@ import type { StoreApi } from 'zustand';
 import type { Conversation, Message, User } from '@/entities';
 import type { ChatApi, RealtimeClient, RealtimeEvent } from '@/services';
 
-type LoadStatus = 'idle' | 'loading' | 'success' | 'error';
+export type LoadStatus = 'idle' | 'loading' | 'success' | 'error';
 
 /** Loaded messages of one conversation, oldest first, plus paging state. */
 export interface Thread {

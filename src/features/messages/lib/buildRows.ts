@@ -4,6 +4,7 @@ import type { Message } from '@/entities';
 const GROUP_WINDOW_MS = 5 * 60_000;
 
 export type ThreadRow =
+  | { type: 'start'; key: string }
   | { type: 'date'; key: string; date: string }
   | {
       type: 'message';

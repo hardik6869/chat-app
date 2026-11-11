@@ -3,6 +3,7 @@ export { useAutoScroll } from './useAutoScroll';
 export { useComposer } from './useComposer';
 export { useConversationHeader } from './useConversationHeader';
 export { useDeleteMessage } from './useDeleteMessage';
+export { useLoadOlderMessages } from './useLoadOlderMessages';
 export { useLongPressMenu } from './useLongPressMenu';
 export { useMessage } from './useMessage';
 export { useMessageActions } from './useMessageActions';
