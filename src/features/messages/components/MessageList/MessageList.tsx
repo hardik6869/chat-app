@@ -39,8 +39,9 @@ export function MessageList({ conversationId }: { conversationId: string }) {
     estimateSize: () => 64,
     getItemKey: (index) => rows[index]?.key ?? index,
     overscan: 10,
-    paddingEnd: 16,
-    scrollPaddingEnd: 16,
+    // Room below the last message for the floating typing indicator.
+    paddingEnd: 48,
+    scrollPaddingEnd: 48,
     initialRect: { width: 0, height: 800 },
   });
 

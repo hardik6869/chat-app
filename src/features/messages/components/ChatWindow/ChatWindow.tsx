@@ -6,6 +6,7 @@ import { useActiveConversation } from '../../hooks';
 import { ChatHeader } from '../ChatHeader';
 import { Composer } from '../Composer';
 import { MessageList } from '../MessageList';
+import { TypingIndicator } from '../TypingIndicator';
 
 /** One open conversation: header, messages and composer. */
 export function ChatWindow({ conversationId }: { conversationId: string }) {
@@ -31,8 +32,9 @@ export function ChatWindow({ conversationId }: { conversationId: string }) {
     <div className="flex h-full flex-col">
       <ChatHeader conversationId={conversationId} />
       <ErrorBoundary title="Couldn't show this conversation" className="flex-1">
-        <div className="min-h-0 flex-1 bg-surface-muted">
+        <div className="relative min-h-0 flex-1 bg-surface-muted">
           <MessageList conversationId={conversationId} />
+          <TypingIndicator conversationId={conversationId} />
         </div>
         <Composer conversationId={conversationId} />
       </ErrorBoundary>

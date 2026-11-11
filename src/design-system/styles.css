@@ -48,6 +48,22 @@
 @theme {
   --radius-md: 0.5rem;
   --radius-lg: 1rem;
+
+  /* Typing dots: gentle staggered bounce (disabled by prefers-reduced-motion below). */
+  --animate-typing: typing 1.2s ease-in-out infinite;
+
+  @keyframes typing {
+    0%,
+    60%,
+    100% {
+      transform: translateY(0);
+      opacity: 0.4;
+    }
+    30% {
+      transform: translateY(-3px);
+      opacity: 1;
+    }
+  }
 }
 
 @layer base {
