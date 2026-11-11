@@ -67,6 +67,7 @@ export function createRealtimeSimulator(db: Database, options: SimulatorOptions 
     messages[index] = next;
     const conversation = db.conversations.get(message.conversationId);
     if (conversation?.lastMessage?.id === next.id) conversation.lastMessage = next;
+    db.touch();
     emit({
       type: 'message:status',
       conversationId: message.conversationId,
@@ -88,6 +89,7 @@ export function createRealtimeSimulator(db: Database, options: SimulatorOptions 
     db.messages.get(conversation.id)?.push(message);
     conversation.lastMessage = message;
     conversation.unreadCount += 1;
+    db.touch();
     emit({ type: 'typing', conversationId: conversation.id, userId: senderId, isTyping: false });
     emit({ type: 'message:new', message });
   }
@@ -111,6 +113,7 @@ export function createRealtimeSimulator(db: Database, options: SimulatorOptions 
     const isOnline = !user.isOnline;
     const lastSeenAt = isOnline ? undefined : new Date().toISOString();
     db.users.set(user.id, { ...user, isOnline, lastSeenAt });
+    db.touch();
     emit({ type: 'presence', userId: user.id, isOnline, lastSeenAt });
   }
 

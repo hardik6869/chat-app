@@ -1,13 +1,8 @@
-import {
-  canEditMessage,
-  isGroup,
-  MAX_MESSAGE_LENGTH,
-  toggleReaction as applyReaction,
-  type Message,
-} from '@/entities';
+import { canEditMessage, isGroup, toggleReaction as applyReaction, type Message } from '@/entities';
 import { mockConfig } from '../config';
 import { createDatabase, type Database } from '../mock-server';
 import { ApiError } from './errors';
+import { validateText } from './validation';
 
 const PAGE_SIZE = 50;
 const SEARCH_LIMIT = 50;
@@ -27,15 +22,6 @@ interface SendMessageInput {
   replyToId?: string;
 }
 
-function validateText(text: string): string {
-  const trimmed = text.trim();
-  if (!trimmed) throw new ApiError('VALIDATION', 'Message cannot be empty');
-  if (trimmed.length > MAX_MESSAGE_LENGTH) {
-    throw new ApiError('VALIDATION', `Message is longer than ${MAX_MESSAGE_LENGTH} characters`);
-  }
-  return trimmed;
-}
-
 /** Async mock backend: latency, random failures, validation and cloned responses like a real API. */
 export function createChatApi({
   db = createDatabase(),
@@ -45,13 +31,18 @@ export function createChatApi({
 }: ChatApiOptions = {}) {
   const me = db.currentUserId;
 
-  async function request<T>(handler: () => T): Promise<T> {
+  /** Simulates the network, runs the handler and returns a copy. Writes trigger persistence. */
+  async function request<T>(handler: () => T, { write = false } = {}): Promise<T> {
     if (latencyMs > 0) {
       await new Promise((resolve) => setTimeout(resolve, latencyMs * (0.5 + random())));
     }
     if (random() < failureRate) throw new ApiError('NETWORK', 'Network request failed');
-    return structuredClone(handler());
+    const result = structuredClone(handler());
+    if (write) db.touch();
+    return result;
   }
+
+  const write = <T>(handler: () => T) => request(handler, { write: true });
 
   function getConversation(conversationId: string) {
     const conversation = db.conversations.get(conversationId);
@@ -125,7 +116,7 @@ export function createChatApi({
       }),
 
     sendMessage: ({ id, conversationId, text, replyToId }: SendMessageInput) =>
-      request(() => {
+      write(() => {
         const messages = getMessages(conversationId);
         const existing = messages.find((message) => message.id === id);
         if (existing) return existing;
@@ -145,7 +136,7 @@ export function createChatApi({
       }),
 
     editMessage: (conversationId: string, messageId: string, text: string) =>
-      request(() => {
+      write(() => {
         const nextText = validateText(text);
         return updateMessage(conversationId, messageId, (message) => ({
           ...message,
@@ -155,7 +146,7 @@ export function createChatApi({
       }),
 
     deleteMessage: (conversationId: string, messageId: string) =>
-      request(() =>
+      write(() =>
         updateMessage(conversationId, messageId, (message) => ({
           ...message,
           text: '',
@@ -165,7 +156,7 @@ export function createChatApi({
       ),
 
     toggleReaction: (conversationId: string, messageId: string, emoji: string) =>
-      request(() =>
+      write(() =>
         updateMessage(
           conversationId,
           messageId,
@@ -175,12 +166,12 @@ export function createChatApi({
       ),
 
     markAsRead: (conversationId: string) =>
-      request(() => {
+      write(() => {
         getConversation(conversationId).unreadCount = 0;
       }),
 
     addMember: (conversationId: string, userId: string) =>
-      request(() => {
+      write(() => {
         const group = getGroup(conversationId);
         if (!db.users.has(userId)) throw new ApiError('NOT_FOUND', 'User not found');
         if (!group.memberIds.includes(userId)) group.memberIds = [...group.memberIds, userId];
@@ -188,7 +179,7 @@ export function createChatApi({
       }),
 
     removeMember: (conversationId: string, userId: string) =>
-      request(() => {
+      write(() => {
         const group = getGroup(conversationId);
         if (userId === me) throw new ApiError('VALIDATION', 'You cannot remove yourself');
         group.memberIds = group.memberIds.filter((id) => id !== userId);
