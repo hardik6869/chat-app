@@ -1,9 +1,10 @@
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { MessageCircle } from 'lucide-react';
-import { useLayoutEffect, useRef } from 'react';
+import { useCallback, useLayoutEffect, useRef } from 'react';
 import { EmptyState, ErrorState, Skeleton } from '@/shared/ui';
-import { useThread } from '../../hooks';
+import { useAutoScroll, useThread } from '../../hooks';
 import { DateSeparator } from '../DateSeparator';
+import { JumpToLatest } from '../JumpToLatest';
 import { MessageBubble } from '../MessageBubble';
 
 function MessageListSkeleton() {
@@ -43,12 +44,24 @@ export function MessageList({ conversationId }: { conversationId: string }) {
     initialRect: { width: 0, height: 800 },
   });
 
+  const scrollToBottom = useCallback(() => {
+    if (rows.length > 0) virtualizer.scrollToIndex(rows.length - 1, { align: 'end' });
+  }, [rows.length, virtualizer]);
+
   // Open at the newest message.
   useLayoutEffect(() => {
     if (didInitialScroll.current || rows.length === 0) return;
     didInitialScroll.current = true;
-    virtualizer.scrollToIndex(rows.length - 1, { align: 'end' });
-  }, [rows.length, virtualizer]);
+    scrollToBottom();
+  }, [rows.length, scrollToBottom]);
+
+  const ready = status === 'success' && rows.length > 0;
+  const { atBottom, unseenCount } = useAutoScroll({
+    scrollRef,
+    rows,
+    scrollToBottom,
+    enabled: ready,
+  });
 
   if (status === 'error') {
     return <ErrorState title="Couldn't load messages" onRetry={retry} className="h-full" />;
@@ -66,46 +79,49 @@ export function MessageList({ conversationId }: { conversationId: string }) {
   }
 
   return (
-    <div
-      ref={scrollRef}
-      role="region"
-      aria-label="Messages"
-      tabIndex={0}
-      className="h-full overflow-y-auto overscroll-contain"
-    >
+    <div className="relative h-full">
       <div
-        role="list"
-        className="relative mx-auto w-full max-w-220"
-        style={{ height: virtualizer.getTotalSize() }}
+        ref={scrollRef}
+        role="region"
+        aria-label="Messages"
+        tabIndex={0}
+        className="h-full overflow-y-auto overscroll-contain"
       >
-        {virtualizer.getVirtualItems().map((item) => {
-          const row = rows[item.index];
-          if (!row) return null;
-          return (
-            <div
-              key={item.key}
-              ref={virtualizer.measureElement}
-              data-index={item.index}
-              role="listitem"
-              aria-setsize={rows.length}
-              aria-posinset={item.index + 1}
-              className="absolute top-0 left-0 w-full px-3 md:px-6"
-              style={{ transform: `translateY(${item.start}px)` }}
-            >
-              {row.type === 'date' ? (
-                <DateSeparator date={row.date} />
-              ) : (
-                <MessageBubble
-                  messageId={row.messageId}
-                  isOwn={row.isOwn}
-                  isFirstInGroup={row.isFirstInGroup}
-                  showSender={isGroup}
-                />
-              )}
-            </div>
-          );
-        })}
+        <div
+          role="list"
+          className="relative mx-auto w-full max-w-220"
+          style={{ height: virtualizer.getTotalSize() }}
+        >
+          {virtualizer.getVirtualItems().map((item) => {
+            const row = rows[item.index];
+            if (!row) return null;
+            return (
+              <div
+                key={item.key}
+                ref={virtualizer.measureElement}
+                data-index={item.index}
+                role="listitem"
+                aria-setsize={rows.length}
+                aria-posinset={item.index + 1}
+                className="absolute top-0 left-0 w-full px-3 md:px-6"
+                style={{ transform: `translateY(${item.start}px)` }}
+              >
+                {row.type === 'date' ? (
+                  <DateSeparator date={row.date} />
+                ) : (
+                  <MessageBubble
+                    messageId={row.messageId}
+                    isOwn={row.isOwn}
+                    isFirstInGroup={row.isFirstInGroup}
+                    showSender={isGroup}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
+      {!atBottom && <JumpToLatest unseenCount={unseenCount} onClick={scrollToBottom} />}
     </div>
   );
 }
