@@ -4,6 +4,7 @@ import { cn } from '@/shared/lib';
 import { buttonBase, buttonVariants, EmptyState, ErrorBoundary } from '@/shared/ui';
 import { useActiveConversation } from '../../hooks';
 import { ChatHeader } from '../ChatHeader';
+import { Composer } from '../Composer';
 import { MessageList } from '../MessageList';
 
 /** One open conversation: header, messages and composer. */
@@ -33,6 +34,7 @@ export function ChatWindow({ conversationId }: { conversationId: string }) {
         <div className="min-h-0 flex-1 bg-surface-muted">
           <MessageList conversationId={conversationId} />
         </div>
+        <Composer conversationId={conversationId} />
       </ErrorBoundary>
     </div>
   );
