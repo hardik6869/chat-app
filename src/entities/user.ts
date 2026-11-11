@@ -1,0 +1,10 @@
+export interface User {
+  id: string;
+  name: string;
+  avatarUrl?: string;
+  isOnline: boolean;
+  /** ISO timestamp, shown as "last seen" when offline. */
+  lastSeenAt?: string;
+}
+
+export type UsersById = Readonly<Record<string, User>>;
