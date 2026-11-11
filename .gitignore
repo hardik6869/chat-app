@@ -1,0 +1,7 @@
+# Claude Code personal settings (permissions, local paths)
+.claude/settings.local.json
+
+# Local working docs (plans, checklists, notes) - never committed
+/PLAN.md
+/docs/
+*.local.md
