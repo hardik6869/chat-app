@@ -6,7 +6,7 @@ Run these from the project root and report each result as pass/fail with the fai
 
 1. `npm run lint` — must show 0 errors and 0 warnings.
 2. `npm run typecheck` — 0 errors.
-3. `npm test -- --run` — all tests pass.
+3. `npm test` — all tests pass.
 4. `npm run build` — succeeds.
 5. `npm run knip` — no unused files, exports or dependencies.
 6. Search `src/` for `console.` and `eslint-disable` — must find nothing.

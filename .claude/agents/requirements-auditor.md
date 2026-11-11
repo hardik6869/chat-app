@@ -26,7 +26,7 @@ You audit this chat app against its requirements. You do not edit files.
    - Every `useEffect` with `setInterval`, `setTimeout`, `addEventListener` or `subscribe` returns a cleanup.
    - No hex colors in `.tsx` files; tokens only.
    - No file under `src/` over 200 lines.
-3. Quality commands: `npm run lint`, `npm run typecheck`, `npm test -- --run`, `npm run build`, `npm run knip`.
+3. Quality commands: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, `npm run knip`.
    Also search for `console.`, `any`, `eslint-disable`, `@ts-ignore`.
 4. Deliverables: README has install steps, a Mermaid architecture diagram, state management explanation,
    decisions, assumptions and trade-offs.

@@ -8,7 +8,7 @@ Vite · React 19 · TypeScript strict · Tailwind v4 · Zustand · React Hook Fo
 
 ## Commands
 
-- `npm run dev` · `npm run build` · `npm run lint` · `npm run typecheck` · `npm test` · `npm run knip`
+- `npm run dev` · `npm run build` · `npm run lint` · `npm run typecheck` · `npm test` · `npm run coverage` · `npm run knip`
 
 ## Rules
 
