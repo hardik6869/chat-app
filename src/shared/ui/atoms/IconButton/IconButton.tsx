@@ -1,12 +1,12 @@
 import type { LucideIcon } from 'lucide-react';
 import type { ComponentProps } from 'react';
 import { cn } from '@/shared/lib';
-import { buttonBase, buttonVariants, type ButtonSize, type ButtonVariant } from '../Button';
-
-const sizes: Record<ButtonSize, { button: string; icon: string }> = {
-  sm: { button: 'size-8 pointer-coarse:size-10', icon: 'size-4' },
-  md: { button: 'size-10 pointer-coarse:size-11', icon: 'size-5' },
-};
+import {
+  iconButtonClassName,
+  iconButtonSizes,
+  type ButtonSize,
+  type ButtonVariant,
+} from '../Button';
 
 export interface IconButtonProps extends Omit<ComponentProps<'button'>, 'children'> {
   icon: LucideIcon;
@@ -30,16 +30,10 @@ export function IconButton({
       type={type}
       aria-label={label}
       title={label}
-      className={cn(
-        buttonBase,
-        'rounded-full',
-        buttonVariants[variant],
-        sizes[size].button,
-        className,
-      )}
+      className={cn(iconButtonClassName({ variant, size }), className)}
       {...props}
     >
-      <Icon aria-hidden className={sizes[size].icon} />
+      <Icon aria-hidden className={iconButtonSizes[size].icon} />
     </button>
   );
 }

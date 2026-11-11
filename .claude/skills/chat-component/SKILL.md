@@ -84,7 +84,7 @@ export const Button = memo(function Button({
 - Never color alone: unread = bold + badge, online = dot + text, status ticks have `aria-label`.
 - Targets ≥ 40 px (44 px on touch). Focus ring is global (`:focus-visible` in `styles.css`); never remove outlines.
 - Live updates (`aria-live="polite"`): new messages, typing, toasts. Respect `motion-reduce:`.
-- Add a `vitest-axe` assertion (`expect(await axe(container)).toHaveNoViolations()`) to organism tests.
+- Add an axe check to organism tests: `await expectNoA11yViolations(container)` from `@/test`.
 
 ## 6. Rules
 

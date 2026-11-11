@@ -1,7 +1,6 @@
 import { CircleHelp } from 'lucide-react';
 import { Link } from 'react-router';
-import { cn } from '@/shared/lib';
-import { buttonBase, buttonVariants, EmptyState } from '@/shared/ui';
+import { buttonClassName, EmptyState } from '@/shared/ui';
 
 export function NotFoundPage() {
   return (
@@ -11,7 +10,7 @@ export function NotFoundPage() {
       description="The page you're looking for doesn't exist."
       className="h-dvh"
       action={
-        <Link to="/" className={cn(buttonBase, buttonVariants.primary, 'h-10 px-4 text-sm')}>
+        <Link to="/" className={buttonClassName()}>
           Go to chats
         </Link>
       }

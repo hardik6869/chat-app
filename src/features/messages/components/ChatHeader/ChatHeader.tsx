@@ -2,7 +2,7 @@ import { ArrowLeft } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router';
 import { cn } from '@/shared/lib';
-import { Avatar, buttonBase, buttonVariants, Skeleton } from '@/shared/ui';
+import { Avatar, iconButtonClassName, Skeleton } from '@/shared/ui';
 import { useConversationHeader } from '../../hooks';
 
 interface ChatHeaderProps {
@@ -20,7 +20,7 @@ export function ChatHeader({ conversationId, actions }: ChatHeaderProps) {
       <Link
         to="/"
         aria-label="Back to conversations"
-        className={cn(buttonBase, buttonVariants.ghost, 'size-10 rounded-full md:hidden')}
+        className={cn(iconButtonClassName(), 'md:hidden')}
       >
         <ArrowLeft aria-hidden className="size-5" />
       </Link>

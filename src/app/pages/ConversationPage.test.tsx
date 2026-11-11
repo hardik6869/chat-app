@@ -19,7 +19,8 @@ function renderAt(path: string) {
 
 const openInfo = async () => {
   await userEvent.click(await screen.findByRole('button', { name: 'Group info' }));
-  return screen.findByRole('complementary', { name: 'Group info' });
+  // The panel is lazy-loaded: its first import can take a moment.
+  return screen.findByRole('complementary', { name: 'Group info' }, { timeout: 3000 });
 };
 
 describe('Group info', () => {

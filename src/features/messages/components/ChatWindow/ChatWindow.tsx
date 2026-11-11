@@ -1,9 +1,8 @@
 import { MessageSquareOff, Search } from 'lucide-react';
 import { lazy, Suspense, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router';
-import { cn } from '@/shared/lib';
 import { useKeyboardShortcut } from '@/shared/hooks';
-import { buttonBase, buttonVariants, EmptyState, ErrorBoundary, IconButton } from '@/shared/ui';
+import { buttonClassName, EmptyState, ErrorBoundary, IconButton } from '@/shared/ui';
 import { useActiveConversation, useNewMessageAnnouncer } from '../../hooks';
 import { ChatHeader } from '../ChatHeader';
 import { Composer } from '../Composer';
@@ -49,7 +48,7 @@ export function ChatWindow({ conversationId, headerActions, aside }: ChatWindowP
         description="It may have been removed, or the link is wrong."
         className="h-full"
         action={
-          <Link to="/" className={cn(buttonBase, buttonVariants.secondary, 'h-8 px-3 text-sm')}>
+          <Link to="/" className={buttonClassName({ variant: 'secondary', size: 'sm' })}>
             Back to chats
           </Link>
         }
