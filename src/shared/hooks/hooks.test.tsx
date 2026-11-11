@@ -1,7 +1,13 @@
 import { act, fireEvent, render, renderHook, screen } from '@testing-library/react';
 import { useRef } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { useClickOutside, useDebounce, useKeyboardShortcut, useMediaQuery } from '@/shared/hooks';
+import {
+  useAutoResize,
+  useClickOutside,
+  useDebounce,
+  useKeyboardShortcut,
+  useMediaQuery,
+} from '@/shared/hooks';
 
 describe('useDebounce', () => {
   afterEach(() => {
@@ -152,5 +158,23 @@ describe('useKeyboardShortcut', () => {
     unmount();
     fireEvent.keyDown(window, { key: 'Escape' });
     expect(onTrigger).toHaveBeenCalledOnce();
+  });
+});
+
+describe('useAutoResize', () => {
+  function Field({ value }: { value: string }) {
+    const ref = useRef<HTMLTextAreaElement>(null);
+    useAutoResize(ref, value);
+    return <textarea ref={ref} aria-label="field" value={value} readOnly />;
+  }
+
+  it('grows with content and returns to the natural height when empty', () => {
+    vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockReturnValue(96);
+    const { rerender } = render(<Field value="three lines of text" />);
+    const field = screen.getByRole('textbox', { name: 'field' });
+    expect(field.style.height).toBe('96px');
+
+    rerender(<Field value="" />);
+    expect(field.style.height).toBe('');
   });
 });
