@@ -2,13 +2,14 @@ import { Outlet, useParams } from 'react-router';
 import { Sidebar } from '@/features/conversations';
 import { ThemeToggle } from '@/features/theme';
 import { ErrorState } from '@/shared/ui';
-import { useChatSession } from '../hooks';
+import { useChatSession, useUnreadTitle } from '../hooks';
 import { AppShell } from './AppShell';
 
 /** Root route: starts the session and lays out sidebar + routed chat. */
 export function ChatLayout() {
   const { conversationId } = useParams();
   const { isError, retry } = useChatSession();
+  useUnreadTitle();
 
   if (isError) {
     return (

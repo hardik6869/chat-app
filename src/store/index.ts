@@ -7,6 +7,11 @@ export const useChatStore = createChatStore({ api: chatApi, realtime });
 /** Starts realtime updates; returns a cleanup for `useEffect`. */
 export const startRealtime = () => connectRealtime(useChatStore, realtime);
 
-export { selectConversationList, selectThreadMessages, selectTypingNames } from './selectors';
+export {
+  selectConversationList,
+  selectThreadMessages,
+  selectTotalUnread,
+  selectTypingNames,
+} from './selectors';
 export type { ConversationFilter } from './selectors';
 export type { ComposerTarget, LoadStatus } from './types';
