@@ -1,6 +1,6 @@
 # Chat App — Claude instructions
 
-Plan: `PLAN.md` · Checklist: `docs/REQUIREMENTS_CHECKLIST.md`
+Plan: `PLAN.md` · Checklist: `docs/REQUIREMENTS_CHECKLIST.md` (both local only, git-ignored)
 
 ## Stack
 Vite · React 19 · TypeScript strict · Tailwind v4 · Zustand · React Hook Form · lucide-react · Vitest + Testing Library.
@@ -22,3 +22,4 @@ Vite · React 19 · TypeScript strict · Tailwind v4 · Zustand · React Hook Fo
 - Before each commit run the `/verify` command; tick the checklist rows the step completes.
 - Husky runs lint-staged (pre-commit), commitlint (commit-msg) and typecheck + tests (pre-push). Never use `--no-verify`.
 - No backend: all data comes from `src/services` mocks.
+- Working docs (plans, checklists, notes, audit reports) stay local: put them in `/docs/`, `PLAN.md` or `*.local.md`, which are git-ignored. Only the README and the app code are committed.
