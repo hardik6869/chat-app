@@ -25,7 +25,7 @@ describe('MessageList', () => {
 
   it('renders messages with date separators, time and "edited"', async () => {
     await loaded('c-ava');
-    const list = screen.getByRole('list');
+    const list = screen.getByRole('region', { name: 'Messages' });
 
     expect(within(list).getByText('Yesterday')).toBeInTheDocument();
     expect(within(list).getByText('Today')).toBeInTheDocument();

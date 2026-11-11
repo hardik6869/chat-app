@@ -7,5 +7,6 @@ export { useLongPressMenu } from './useLongPressMenu';
 export { useMessage } from './useMessage';
 export { useMessageActions } from './useMessageActions';
 export { useQuotedMessage } from './useQuotedMessage';
+export { useReactions } from './useReactions';
 export { useThread } from './useThread';
 export { formatTyping, useTypingText } from './useTypingText';

@@ -6,6 +6,7 @@ import { Avatar } from '@/shared/ui';
 import { useLongPressMenu, useMessage } from '../../hooks';
 import { MessageActions } from '../MessageActions';
 import { QuotedMessage } from '../QuotedMessage';
+import { ReactionChips } from '../ReactionChips';
 
 interface MessageBubbleProps {
   messageId: string;
@@ -46,7 +47,7 @@ export const MessageBubble = memo(function MessageBubble({
         ) : (
           <span aria-hidden className="w-8 shrink-0" />
         ))}
-      {isOwn && !deleted && <MessageActions messageId={messageId} />}
+      {isOwn && !deleted && <MessageActions messageId={messageId} isOwn />}
       <div
         className={cn(
           'flex max-w-[85%] min-w-0 flex-col gap-1 md:max-w-[75%]',
@@ -93,6 +94,7 @@ export const MessageBubble = memo(function MessageBubble({
             )}
           </p>
         </div>
+        {!deleted && <ReactionChips messageId={messageId} />}
         {failed && (
           <p className="flex items-center gap-1 text-xs text-danger">
             <CircleAlert aria-hidden className="size-4" />
@@ -103,7 +105,7 @@ export const MessageBubble = memo(function MessageBubble({
           </p>
         )}
       </div>
-      {!isOwn && !deleted && <MessageActions messageId={messageId} />}
+      {!isOwn && !deleted && <MessageActions messageId={messageId} isOwn={false} />}
     </div>
   );
 });

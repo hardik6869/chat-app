@@ -1,10 +1,13 @@
 import { Copy, Pencil, Reply, Trash2 } from 'lucide-react';
 import { cn } from '@/shared/lib';
 import { IconButton } from '@/shared/ui';
-import { useMessageActions } from '../../hooks';
+import { useMessageActions, useReactions } from '../../hooks';
+import { ReactionPicker } from '../ReactionPicker';
 
 interface MessageActionsProps {
   messageId: string;
+  /** My messages have the pill on their left, others' on their right. */
+  isOwn: boolean;
   className?: string;
 }
 
@@ -12,9 +15,10 @@ interface MessageActionsProps {
  * Compact action pill. It's hidden until the message is hovered, long-pressed or anything
  * inside gets keyboard focus, so it stays reachable with Tab while keeping the thread clean.
  */
-export function MessageActions({ messageId, className }: MessageActionsProps) {
+export function MessageActions({ messageId, isOwn, className }: MessageActionsProps) {
   const { reply, edit, copy, requestDelete, canCopy, canEdit, canDelete } =
     useMessageActions(messageId);
+  const { toggle } = useReactions(messageId);
 
   return (
     <div
@@ -26,6 +30,7 @@ export function MessageActions({ messageId, className }: MessageActionsProps) {
         className,
       )}
     >
+      <ReactionPicker onPick={toggle} align={isOwn ? 'end' : 'start'} />
       <IconButton icon={Reply} label="Reply" size="sm" onClick={reply} />
       {canCopy && (
         <IconButton
