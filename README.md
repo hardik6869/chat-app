@@ -91,30 +91,27 @@ exposes a barrel (`index.ts`), and modules are imported through `@/…` aliases.
 
 ```mermaid
 flowchart TD
-  subgraph UI["UI (React)"]
-    App["app/ – routes, layout, pages"]
-    Features["features/ – conversations · messages · groups · theme"]
-    SharedUI["shared/ui – atoms → molecules (design system)"]
-  end
-  Hooks["Feature hooks – view models and actions"]
-  Store["store/ – Zustand: session · messages · realtime · ui slices"]
-  subgraph Services["services/ – mock backend"]
-    Api["api/ – async CRUD (latency, failures, validation)"]
-    Realtime["realtime/ – socket-like event simulator"]
-    Db[("mock-server/ – in-memory DB saved to localStorage")]
-  end
-  Entities["entities/ – typed models and domain rules"]
+  App["app: routes, layout, pages"]
+  Features["features: conversations, messages, groups, theme"]
+  SharedUI["shared/ui: atoms and molecules (design system)"]
+  Hooks["feature hooks: view models and actions"]
+  Store["store: Zustand slices (session, messages, realtime, ui)"]
+  Api["services/api: async mock API (latency, failures, validation)"]
+  Realtime["services/realtime: socket-like event simulator"]
+  Db[("services/mock-server: in-memory DB saved to localStorage")]
+  Entities["entities: typed models and domain rules"]
 
-  App --> Features --> Hooks --> Store
+  App --> Features
   Features --> SharedUI
-  Store -->|"requests"| Api
-  Realtime -->|"events: message, status, typing, presence"| Store
-  Store -->|"message:sent"| Realtime
+  Features --> Hooks
+  Hooks --> Store
+  Store -- requests --> Api
+  Store -- "message sent" --> Realtime
+  Realtime -- "new message, status, typing, presence" --> Store
   Api --> Db
   Realtime --> Db
-  Hooks -.-> Entities
   Store -.-> Entities
-  Services -.-> Entities
+  Api -.-> Entities
 ```
 
 ```text
