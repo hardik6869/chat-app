@@ -3,12 +3,15 @@
 Plan: `PLAN.md` · Checklist: `docs/REQUIREMENTS_CHECKLIST.md` (both local only, git-ignored)
 
 ## Stack
+
 Vite · React 19 · TypeScript strict · Tailwind v4 · Zustand · React Hook Form · lucide-react · Vitest + Testing Library.
 
 ## Commands
+
 - `npm run dev` · `npm run build` · `npm run lint` · `npm run typecheck` · `npm test` · `npm run knip`
 
 ## Rules
+
 - Follow PLAN.md §6 one step at a time; one small Conventional Commit per step.
 - Atomic design: `shared/ui/atoms` → `shared/ui/molecules` → feature organisms.
 - Every folder has a barrel `index.ts`; import via `@/…` aliases, never deep paths across modules.

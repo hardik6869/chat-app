@@ -1,6 +1,6 @@
 ---
 description: Implement the next unfinished step from PLAN.md and commit it
-argument-hint: "[step number, optional]"
+argument-hint: '[step number, optional]'
 ---
 
 1. Read `PLAN.md` §6 and `git log --oneline`. Pick step $ARGUMENTS, or the first step whose
