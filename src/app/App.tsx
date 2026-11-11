@@ -1,7 +1,14 @@
+import { createBrowserRouter, RouterProvider } from 'react-router';
+import { ErrorBoundary, Toaster } from '@/shared/ui';
+import { routes } from './routes';
+
+const router = createBrowserRouter(routes);
+
 export function App() {
   return (
-    <main className="flex h-full items-center justify-center p-4">
-      <h1 className="text-lg font-semibold text-primary-text">Chat App</h1>
-    </main>
+    <ErrorBoundary title="The app ran into a problem" className="h-dvh">
+      <RouterProvider router={router} />
+      <Toaster />
+    </ErrorBoundary>
   );
 }

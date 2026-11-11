@@ -14,6 +14,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     restoreMocks: true,
+    env: { VITE_MOCK_LATENCY_MS: '0', VITE_MOCK_FAILURE_RATE: '0' },
     css: { include: [/tokens\.css(\?raw)?$/] },
     coverage: {
       provider: 'v8',
