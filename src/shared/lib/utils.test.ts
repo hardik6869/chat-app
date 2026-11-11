@@ -1,5 +1,36 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { captureError, cn, createId, safeStorage, setErrorReporter } from '@/shared/lib';
+import {
+  captureError,
+  cn,
+  copyToClipboard,
+  createId,
+  safeStorage,
+  setErrorReporter,
+} from '@/shared/lib';
+
+describe('copyToClipboard', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('writes text and resolves true', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal('navigator', { clipboard: { writeText } });
+
+    await expect(copyToClipboard('hello')).resolves.toBe(true);
+    expect(writeText).toHaveBeenCalledWith('hello');
+  });
+
+  it('resolves false and reports when the clipboard is unavailable', async () => {
+    const reporter = vi.fn();
+    const restore = setErrorReporter(reporter);
+    vi.stubGlobal('navigator', {});
+
+    await expect(copyToClipboard('hello')).resolves.toBe(false);
+    expect(reporter).toHaveBeenCalledOnce();
+    restore();
+  });
+});
 
 describe('cn', () => {
   it('joins conditional classes', () => {
