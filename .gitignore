@@ -1,3 +1,22 @@
+# Dependencies & build output
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+*.log
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Editor & OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
 # Claude Code personal settings (permissions, local paths)
 .claude/settings.local.json
 
