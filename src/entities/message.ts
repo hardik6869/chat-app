@@ -1,6 +1,9 @@
 /** Lifecycle of an outgoing message: optimistic → server → recipient → seen (or failed). */
 type MessageStatus = 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
 
+/** Longest message the composer and API accept. */
+export const MAX_MESSAGE_LENGTH = 4000;
+
 export interface Reaction {
   emoji: string;
   userIds: string[];

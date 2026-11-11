@@ -1,0 +1,199 @@
+import {
+  canEditMessage,
+  isGroup,
+  MAX_MESSAGE_LENGTH,
+  toggleReaction as applyReaction,
+  type Message,
+} from '@/entities';
+import { mockConfig } from '../config';
+import { createDatabase, type Database } from '../mock-server';
+import { ApiError } from './errors';
+
+const PAGE_SIZE = 50;
+const SEARCH_LIMIT = 50;
+
+interface ChatApiOptions {
+  db?: Database;
+  latencyMs?: number;
+  failureRate?: number;
+  random?: () => number;
+}
+
+interface SendMessageInput {
+  /** Client-generated id: makes optimistic updates and retries idempotent. */
+  id: string;
+  conversationId: string;
+  text: string;
+  replyToId?: string;
+}
+
+function validateText(text: string): string {
+  const trimmed = text.trim();
+  if (!trimmed) throw new ApiError('VALIDATION', 'Message cannot be empty');
+  if (trimmed.length > MAX_MESSAGE_LENGTH) {
+    throw new ApiError('VALIDATION', `Message is longer than ${MAX_MESSAGE_LENGTH} characters`);
+  }
+  return trimmed;
+}
+
+/** Async mock backend: latency, random failures, validation and cloned responses like a real API. */
+export function createChatApi({
+  db = createDatabase(),
+  latencyMs = mockConfig.latencyMs,
+  failureRate = mockConfig.failureRate,
+  random = Math.random,
+}: ChatApiOptions = {}) {
+  const me = db.currentUserId;
+
+  async function request<T>(handler: () => T): Promise<T> {
+    if (latencyMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, latencyMs * (0.5 + random())));
+    }
+    if (random() < failureRate) throw new ApiError('NETWORK', 'Network request failed');
+    return structuredClone(handler());
+  }
+
+  function getConversation(conversationId: string) {
+    const conversation = db.conversations.get(conversationId);
+    if (!conversation) throw new ApiError('NOT_FOUND', 'Conversation not found');
+    return conversation;
+  }
+
+  function getMessages(conversationId: string) {
+    getConversation(conversationId);
+    let messages = db.messages.get(conversationId);
+    if (!messages) {
+      messages = [];
+      db.messages.set(conversationId, messages);
+    }
+    return messages;
+  }
+
+  /** Replaces a message, keeping `lastMessage` in sync. By default only the author may change it. */
+  function updateMessage(
+    conversationId: string,
+    messageId: string,
+    update: (message: Message) => Message,
+    { ownOnly = true } = {},
+  ) {
+    const messages = getMessages(conversationId);
+    const index = messages.findIndex((message) => message.id === messageId);
+    const current = messages[index];
+    if (!current) throw new ApiError('NOT_FOUND', 'Message not found');
+    if (ownOnly && !canEditMessage(current, me)) {
+      throw new ApiError('FORBIDDEN', 'You can only change your own messages');
+    }
+    const next = update(current);
+    messages[index] = next;
+    const conversation = getConversation(conversationId);
+    if (conversation.lastMessage?.id === messageId) conversation.lastMessage = next;
+    return next;
+  }
+
+  function getGroup(conversationId: string) {
+    const conversation = getConversation(conversationId);
+    if (!isGroup(conversation)) throw new ApiError('FORBIDDEN', 'Only groups have members');
+    return conversation;
+  }
+
+  return {
+    fetchBootstrap: () =>
+      request(() => ({
+        currentUserId: me,
+        users: [...db.users.values()],
+        conversations: [...db.conversations.values()],
+      })),
+
+    /** Newest page first call; pass `beforeId` (oldest loaded message) to load older pages. */
+    fetchMessages: (conversationId: string, { beforeId }: { beforeId?: string } = {}) =>
+      request(() => {
+        const messages = getMessages(conversationId);
+        const end = beforeId ? messages.findIndex((message) => message.id === beforeId) : -1;
+        const stop = end === -1 ? messages.length : end;
+        const start = Math.max(0, stop - PAGE_SIZE);
+        return { messages: messages.slice(start, stop), hasMore: start > 0 };
+      }),
+
+    searchMessages: (conversationId: string, query: string) =>
+      request(() => {
+        const needle = query.trim().toLowerCase();
+        if (!needle) return [];
+        return getMessages(conversationId)
+          .filter((m) => !m.deletedAt && m.text.toLowerCase().includes(needle))
+          .slice(-SEARCH_LIMIT)
+          .reverse();
+      }),
+
+    sendMessage: ({ id, conversationId, text, replyToId }: SendMessageInput) =>
+      request(() => {
+        const messages = getMessages(conversationId);
+        const existing = messages.find((message) => message.id === id);
+        if (existing) return existing;
+        const message: Message = {
+          id,
+          conversationId,
+          senderId: me,
+          text: validateText(text),
+          createdAt: new Date().toISOString(),
+          status: 'sent',
+          replyToId,
+          reactions: [],
+        };
+        messages.push(message);
+        getConversation(conversationId).lastMessage = message;
+        return message;
+      }),
+
+    editMessage: (conversationId: string, messageId: string, text: string) =>
+      request(() => {
+        const nextText = validateText(text);
+        return updateMessage(conversationId, messageId, (message) => ({
+          ...message,
+          text: nextText,
+          editedAt: new Date().toISOString(),
+        }));
+      }),
+
+    deleteMessage: (conversationId: string, messageId: string) =>
+      request(() =>
+        updateMessage(conversationId, messageId, (message) => ({
+          ...message,
+          text: '',
+          reactions: [],
+          deletedAt: new Date().toISOString(),
+        })),
+      ),
+
+    toggleReaction: (conversationId: string, messageId: string, emoji: string) =>
+      request(() =>
+        updateMessage(
+          conversationId,
+          messageId,
+          (message) => ({ ...message, reactions: applyReaction(message.reactions, emoji, me) }),
+          { ownOnly: false },
+        ),
+      ),
+
+    markAsRead: (conversationId: string) =>
+      request(() => {
+        getConversation(conversationId).unreadCount = 0;
+      }),
+
+    addMember: (conversationId: string, userId: string) =>
+      request(() => {
+        const group = getGroup(conversationId);
+        if (!db.users.has(userId)) throw new ApiError('NOT_FOUND', 'User not found');
+        if (!group.memberIds.includes(userId)) group.memberIds = [...group.memberIds, userId];
+        return group;
+      }),
+
+    removeMember: (conversationId: string, userId: string) =>
+      request(() => {
+        const group = getGroup(conversationId);
+        if (userId === me) throw new ApiError('VALIDATION', 'You cannot remove yourself');
+        group.memberIds = group.memberIds.filter((id) => id !== userId);
+        group.adminIds = group.adminIds.filter((id) => id !== userId);
+        return group;
+      }),
+  };
+}
