@@ -141,7 +141,7 @@ export const createMessagesSlice: SliceCreator<MessagesSlice> = (set, get, { api
       }
     },
 
-    async sendMessage(conversationId, text, replyToId) {
+    async sendMessage(conversationId, text, replyToId, attachments) {
       const message: Message = {
         id: createId('msg'),
         conversationId,
@@ -150,9 +150,10 @@ export const createMessagesSlice: SliceCreator<MessagesSlice> = (set, get, { api
         createdAt: new Date().toISOString(),
         status: 'sending',
         replyToId,
+        attachments: attachments?.length ? attachments : undefined,
         reactions: [],
       };
-      if (!message.text) return;
+      if (!message.text && !message.attachments) return;
       set((state) => appendMessage(state, message));
       await deliver(message);
     },

@@ -4,6 +4,7 @@ import {
   cn,
   copyToClipboard,
   createId,
+  formatFileSize,
   safeStorage,
   setErrorReporter,
 } from '@/shared/lib';
@@ -108,5 +109,17 @@ describe('safeStorage', () => {
     }).not.toThrow();
     expect(reporter).toHaveBeenCalledTimes(3);
     restore();
+  });
+});
+
+describe('formatFileSize', () => {
+  it.each([
+    [512, '512 B'],
+    [2048, '2 KB'],
+    [1536, '1.5 KB'],
+    [2_400_000, '2.3 MB'],
+    [15 * 1024 * 1024, '15 MB'],
+  ])('%d → %s', (bytes, expected) => {
+    expect(formatFileSize(bytes)).toBe(expected);
   });
 });

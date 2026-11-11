@@ -1,28 +1,12 @@
 import { canEditMessage, isGroup, toggleReaction as applyReaction, type Message } from '@/entities';
 import { mockConfig } from '../config';
-import { createDatabase, type Database } from '../mock-server';
+import { createDatabase } from '../mock-server';
 import { ApiError } from './errors';
+import type { ChatApiOptions, SendMessageInput } from './types';
 import { validateText } from './validation';
 
 const PAGE_SIZE = 50;
 const SEARCH_LIMIT = 50;
-
-interface ChatApiOptions {
-  db?: Database;
-  latencyMs?: number;
-  failureRate?: number;
-  random?: () => number;
-  /** Requests fail like a real network call while this returns false. */
-  isOnline?: () => boolean;
-}
-
-interface SendMessageInput {
-  /** Client-generated id: makes optimistic updates and retries idempotent. */
-  id: string;
-  conversationId: string;
-  text: string;
-  replyToId?: string;
-}
 
 /** Async mock backend: latency, random failures, validation and cloned responses like a real API. */
 export function createChatApi({
@@ -119,7 +103,7 @@ export function createChatApi({
           .reverse();
       }),
 
-    sendMessage: ({ id, conversationId, text, replyToId }: SendMessageInput) =>
+    sendMessage: ({ id, conversationId, text, replyToId, attachments }: SendMessageInput) =>
       write(() => {
         const messages = getMessages(conversationId);
         const existing = messages.find((message) => message.id === id);
@@ -128,10 +112,12 @@ export function createChatApi({
           id,
           conversationId,
           senderId: me,
-          text: validateText(text),
+          // A message may be only attachments.
+          text: validateText(text, { allowEmpty: (attachments?.length ?? 0) > 0 }),
           createdAt: new Date().toISOString(),
           status: 'sent',
           replyToId,
+          attachments,
           reactions: [],
         };
         messages.push(message);

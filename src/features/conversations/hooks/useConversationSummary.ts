@@ -25,7 +25,11 @@ const firstName = (name: string) => name.split(' ')[0] ?? name;
 function previewText(message: Message | undefined, sender: string | undefined, prefix: boolean) {
   if (!message) return 'No messages yet';
   if (message.deletedAt) return 'This message was deleted';
-  return prefix && sender ? `${sender}: ${message.text}` : message.text;
+  const files = message.attachments ?? [];
+  const text =
+    message.text ||
+    (files.length > 1 ? `📎 ${files.length} attachments` : `📎 ${files[0]?.name ?? 'Attachment'}`);
+  return prefix && sender ? `${sender}: ${text}` : text;
 }
 
 /** Everything one conversation row shows, as primitives so the row re-renders only on change. */

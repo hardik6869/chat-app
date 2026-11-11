@@ -1,5 +1,5 @@
 import type { StoreApi } from 'zustand';
-import type { Conversation, Message, User } from '@/entities';
+import type { Attachment, Conversation, Message, User } from '@/entities';
 import type { ChatApi, RealtimeClient, RealtimeEvent } from '@/services';
 
 export type LoadStatus = 'idle' | 'loading' | 'success' | 'error';
@@ -45,7 +45,12 @@ export interface MessagesSlice {
   loadMessages: (conversationId: string) => Promise<void>;
   loadOlderMessages: (conversationId: string) => Promise<void>;
   /** Optimistic: shows instantly as "sending", ends as "sent" or "failed". Never throws. */
-  sendMessage: (conversationId: string, text: string, replyToId?: string) => Promise<void>;
+  sendMessage: (
+    conversationId: string,
+    text: string,
+    replyToId?: string,
+    attachments?: Attachment[],
+  ) => Promise<void>;
   retryMessage: (messageId: string) => Promise<void>;
   /** Messages written while offline, sent in order once the browser is back online. */
   outbox: string[];

@@ -1,8 +1,9 @@
-import { Check, SendHorizontal } from 'lucide-react';
-import { useId } from 'react';
+import { Check, Paperclip, SendHorizontal } from 'lucide-react';
+import { useId, useRef } from 'react';
 import { cn } from '@/shared/lib';
 import { IconButton, Textarea } from '@/shared/ui';
 import { useComposer } from '../../hooks';
+import { AttachmentPreviews } from '../Attachments';
 import { ComposerTargetBar } from '../ComposerTargetBar';
 
 /** Pinned message box: grows to 6 lines, Enter sends, Shift+Enter adds a line. */
@@ -15,6 +16,9 @@ export function Composer({ conversationId }: { conversationId: string }) {
     onKeyDown,
     onSubmit,
     canSend,
+    attachments,
+    addFiles,
+    removeFile,
     isReady,
     placeholder,
     length,
@@ -22,6 +26,7 @@ export function Composer({ conversationId }: { conversationId: string }) {
     maxLength,
   } = useComposer(conversationId);
   const hintId = useId();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   return (
     <form
@@ -31,7 +36,30 @@ export function Composer({ conversationId }: { conversationId: string }) {
       className="shrink-0 border-t border-border bg-surface px-3 py-3 md:px-6"
     >
       {target && <ComposerTargetBar target={target} onCancel={cancelTarget} />}
+      <AttachmentPreviews attachments={attachments} onRemove={removeFile} />
       <div className="mx-auto flex max-w-220 items-end gap-2">
+        {!isEditing && (
+          <>
+            <IconButton
+              icon={Paperclip}
+              label="Attach files"
+              disabled={!isReady}
+              onClick={() => fileInputRef.current?.click()}
+            />
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              hidden
+              aria-hidden
+              tabIndex={-1}
+              onChange={(event) => {
+                addFiles(event.target.files ?? []);
+                event.target.value = '';
+              }}
+            />
+          </>
+        )}
         <Textarea
           {...textareaProps}
           aria-label="Message"

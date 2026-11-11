@@ -152,6 +152,20 @@ describe('chatApi', () => {
     await expectApiError(api.addMember('c-ava', 'mia'), 'FORBIDDEN');
   });
 
+  it('accepts a message that is only attachments', async () => {
+    const { api } = setup();
+    const attachments = [{ id: 'f1', name: 'a.png', type: 'image/png', size: 10, url: 'blob:a' }];
+
+    const sent = await api.sendMessage({
+      id: 'm-file',
+      conversationId: 'c-ava',
+      text: ' ',
+      attachments,
+    });
+
+    expect(sent).toMatchObject({ text: '', attachments });
+  });
+
   it('fails like a real request while the browser is offline', async () => {
     const db = createDatabase(createSeed(NOW));
     const api = createChatApi({ db, latencyMs: 0, failureRate: 0, isOnline: () => false });

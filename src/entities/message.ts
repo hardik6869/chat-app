@@ -4,6 +4,19 @@ export type MessageStatus = 'sending' | 'sent' | 'delivered' | 'read' | 'failed'
 /** Longest message the composer and API accept. */
 export const MAX_MESSAGE_LENGTH = 4000;
 
+/** Attachment limits: how many files per message, and the largest file allowed. */
+export const MAX_ATTACHMENTS = 4;
+export const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
+
+/** A local file shown in the chat (nothing is uploaded: `url` is an object URL). */
+export interface Attachment {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  url: string;
+}
+
 export interface Reaction {
   emoji: string;
   userIds: string[];
@@ -20,6 +33,7 @@ export interface Message {
   deletedAt?: string;
   status: MessageStatus;
   replyToId?: string;
+  attachments?: Attachment[];
   reactions: Reaction[];
 }
 

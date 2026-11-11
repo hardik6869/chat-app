@@ -28,7 +28,7 @@ describe('Composer', () => {
 
     await userEvent.type(field(), 'Hello Sofia{Enter}');
 
-    expect(sendMessage).toHaveBeenCalledWith(CONVERSATION, 'Hello Sofia', undefined);
+    expect(sendMessage).toHaveBeenCalledWith(CONVERSATION, 'Hello Sofia', undefined, undefined);
     expect(field()).toHaveValue('');
     expect(useChatStore.getState().drafts[CONVERSATION]).toBeUndefined();
     expect(field()).toHaveFocus();
@@ -43,7 +43,12 @@ describe('Composer', () => {
     expect(sendMessage).not.toHaveBeenCalled();
 
     await userEvent.click(sendButton());
-    expect(sendMessage).toHaveBeenCalledWith(CONVERSATION, 'Line one\nLine two', undefined);
+    expect(sendMessage).toHaveBeenCalledWith(
+      CONVERSATION,
+      'Line one\nLine two',
+      undefined,
+      undefined,
+    );
   });
 
   it('does not send blank messages or while an IME is composing', async () => {

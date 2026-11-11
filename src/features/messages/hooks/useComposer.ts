@@ -5,6 +5,7 @@ import { useAutoResize } from '@/shared/hooks';
 import { captureError } from '@/shared/lib';
 import { toast } from '@/shared/ui';
 import { selectThreadMessages, useChatStore } from '@/store';
+import { useAttachments } from './useAttachments';
 
 interface ComposerValues {
   text: string;
@@ -30,6 +31,7 @@ export function useComposer(conversationId: string) {
   const threadStatus = useChatStore((state) => state.threads[conversationId]?.status ?? 'idle');
   const isReady = threadStatus === 'success';
   const isEditing = target?.mode === 'edit';
+  const files = useAttachments();
 
   const { register, handleSubmit, reset, setFocus, control } = useForm<ComposerValues>({
     defaultValues: { text: draftOf(conversationId) },
@@ -62,7 +64,8 @@ export function useComposer(conversationId: string) {
   });
 
   const submit = handleSubmit(({ text: value }) => {
-    if (!value.trim() || !isReady) return;
+    const hasFiles = files.attachments.length > 0 && !isEditing;
+    if ((!value.trim() && !hasFiles) || !isReady) return;
     if (target?.mode === 'edit') {
       const original = useChatStore.getState().messages[target.messageId]?.text;
       cancelTarget();
@@ -76,7 +79,12 @@ export function useComposer(conversationId: string) {
     reset({ text: '' });
     setDraft(conversationId, '');
     setFocus('text');
-    void sendMessage(conversationId, value, target?.messageId);
+    void sendMessage(
+      conversationId,
+      value,
+      target?.messageId,
+      hasFiles ? files.takeAll() : undefined,
+    );
     if (target) setComposerTarget(conversationId, undefined);
   });
 
@@ -122,7 +130,10 @@ export function useComposer(conversationId: string) {
       : threadStatus === 'error'
         ? "Messages couldn't load"
         : 'Loading messages…',
-    canSend: isReady && text.trim().length > 0,
+    attachments: files.attachments,
+    addFiles: files.add,
+    removeFile: files.remove,
+    canSend: isReady && (text.trim().length > 0 || (!isEditing && files.attachments.length > 0)),
     length: text.length,
     showCounter: text.length >= COUNTER_THRESHOLD,
     maxLength: MAX_MESSAGE_LENGTH,

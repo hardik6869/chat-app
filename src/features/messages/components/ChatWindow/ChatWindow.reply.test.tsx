@@ -45,7 +45,7 @@ describe('Reply to a message', () => {
 
     await userEvent.type(composer, 'Happy to help!{Enter}');
 
-    expect(sendMessage).toHaveBeenCalledWith(CONVERSATION, 'Happy to help!', 'c-ava-m2');
+    expect(sendMessage).toHaveBeenCalledWith(CONVERSATION, 'Happy to help!', 'c-ava-m2', undefined);
     expect(screen.queryByText('Replying to')).toBeNull();
   });
 

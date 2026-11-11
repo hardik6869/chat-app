@@ -5,6 +5,7 @@ import { cn, formatTime } from '@/shared/lib';
 import { Avatar } from '@/shared/ui';
 import { useChatStore } from '@/store';
 import { useLongPressMenu, useMessage } from '../../hooks';
+import { MessageAttachments } from '../Attachments';
 import { MessageActions } from '../MessageActions';
 import { QuotedMessage } from '../QuotedMessage';
 import { ReactionChips } from '../ReactionChips';
@@ -81,9 +82,16 @@ export const MessageBubble = memo(function MessageBubble({
               This message was deleted
             </p>
           ) : (
-            <p className="text-sm leading-relaxed wrap-anywhere whitespace-pre-wrap">
-              {message.text}
-            </p>
+            <>
+              {message.attachments && (
+                <MessageAttachments attachments={message.attachments} isOwn={isOwn} />
+              )}
+              {message.text && (
+                <p className="text-sm leading-relaxed wrap-anywhere whitespace-pre-wrap">
+                  {message.text}
+                </p>
+              )}
+            </>
           )}
           <p
             className={cn(
