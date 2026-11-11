@@ -1,5 +1,6 @@
 import { Outlet, useParams } from 'react-router';
 import { Sidebar } from '@/features/conversations';
+import { ThemeToggle } from '@/features/theme';
 import { ErrorState } from '@/shared/ui';
 import { useChatSession } from '../hooks';
 import { AppShell } from './AppShell';
@@ -22,7 +23,10 @@ export function ChatLayout() {
   }
 
   return (
-    <AppShell sidebar={<Sidebar />} hasSelection={conversationId !== undefined}>
+    <AppShell
+      sidebar={<Sidebar actions={<ThemeToggle />} />}
+      hasSelection={conversationId !== undefined}
+    >
       <Outlet />
     </AppShell>
   );

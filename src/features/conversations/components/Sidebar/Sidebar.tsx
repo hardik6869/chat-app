@@ -2,8 +2,14 @@ import type { ReactNode } from 'react';
 import { Avatar, Skeleton } from '@/shared/ui';
 import { useCurrentUser } from '../../hooks';
 
+interface SidebarProps {
+  /** Header buttons supplied by the app (e.g. theme toggle). */
+  actions?: ReactNode;
+  children?: ReactNode;
+}
+
 /** Sidebar frame: 64 px header aligned with the chat header, then scrollable content. */
-export function Sidebar({ children }: { children?: ReactNode }) {
+export function Sidebar({ actions, children }: SidebarProps) {
   const currentUser = useCurrentUser();
 
   return (
@@ -15,6 +21,7 @@ export function Sidebar({ children }: { children?: ReactNode }) {
           <Skeleton className="size-10 rounded-full" />
         )}
         <h1 className="flex-1 text-lg font-semibold text-text">Chats</h1>
+        {actions}
       </header>
       <div className="min-h-0 flex-1">{children}</div>
     </div>

@@ -8,6 +8,20 @@
     <meta name="color-scheme" content="light dark" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>Chat App</title>
+    <script>
+      // Apply the saved or system theme before first paint (no flash). Mirrors themeStore.ts.
+      (function () {
+        try {
+          var saved = localStorage.getItem('chat-app:theme');
+          var dark = saved
+            ? saved === 'dark'
+            : window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (dark) document.documentElement.classList.add('dark');
+        } catch (error) {
+          /* storage blocked: keep the light theme */
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
