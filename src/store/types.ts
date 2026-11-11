@@ -47,10 +47,19 @@ export interface RealtimeSlice {
   handleRealtimeEvent: (event: RealtimeEvent) => void;
 }
 
+/** What the composer is doing besides writing a new message. */
+export interface ComposerTarget {
+  mode: 'reply' | 'edit';
+  messageId: string;
+}
+
 export interface UiSlice {
   /** Unsent composer text per conversation (persisted). */
   drafts: Record<string, string>;
   setDraft: (conversationId: string, text: string) => void;
+  /** Reply/edit target per conversation (not persisted). */
+  composerTargets: Record<string, ComposerTarget>;
+  setComposerTarget: (conversationId: string, target?: ComposerTarget) => void;
 }
 
 export type ChatState = SessionSlice & MessagesSlice & RealtimeSlice & UiSlice;

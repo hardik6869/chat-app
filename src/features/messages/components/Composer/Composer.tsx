@@ -3,11 +3,21 @@ import { useId } from 'react';
 import { cn } from '@/shared/lib';
 import { IconButton, Textarea } from '@/shared/ui';
 import { useComposer } from '../../hooks';
+import { ComposerTargetBar } from '../ComposerTargetBar';
 
 /** Pinned message box: grows to 6 lines, Enter sends, Shift+Enter adds a line. */
 export function Composer({ conversationId }: { conversationId: string }) {
-  const { textareaProps, onKeyDown, onSubmit, canSend, length, showCounter, maxLength } =
-    useComposer(conversationId);
+  const {
+    target,
+    cancelTarget,
+    textareaProps,
+    onKeyDown,
+    onSubmit,
+    canSend,
+    length,
+    showCounter,
+    maxLength,
+  } = useComposer(conversationId);
   const hintId = useId();
 
   return (
@@ -17,6 +27,7 @@ export function Composer({ conversationId }: { conversationId: string }) {
       }}
       className="shrink-0 border-t border-border bg-surface px-3 py-3 md:px-6"
     >
+      {target && <ComposerTargetBar target={target} onCancel={cancelTarget} />}
       <div className="mx-auto flex max-w-220 items-end gap-2">
         <Textarea
           {...textareaProps}

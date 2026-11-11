@@ -1,9 +1,11 @@
 import { Ban, CircleAlert } from 'lucide-react';
-import { memo } from 'react';
+import { memo, useRef } from 'react';
 import { MessageStatusIcon } from '@/entities';
 import { cn, formatTime } from '@/shared/lib';
 import { Avatar } from '@/shared/ui';
-import { useMessage } from '../../hooks';
+import { useLongPressMenu, useMessage } from '../../hooks';
+import { MessageActions } from '../MessageActions';
+import { QuotedMessage } from '../QuotedMessage';
 
 interface MessageBubbleProps {
   messageId: string;
@@ -21,6 +23,8 @@ export const MessageBubble = memo(function MessageBubble({
   showSender,
 }: MessageBubbleProps) {
   const { message, sender, retry } = useMessage(messageId);
+  const rowRef = useRef<HTMLDivElement>(null);
+  const actionsOpen = useLongPressMenu(rowRef);
   if (!message) return null;
   const deleted = message.deletedAt !== undefined;
   const withSender = showSender && !isOwn;
@@ -28,8 +32,10 @@ export const MessageBubble = memo(function MessageBubble({
 
   return (
     <div
+      ref={rowRef}
+      data-actions={actionsOpen ? 'open' : undefined}
       className={cn(
-        'flex items-start gap-2',
+        'group flex items-start gap-2',
         isOwn ? 'justify-end' : 'justify-start',
         isFirstInGroup ? 'mt-3' : 'mt-0.5',
       )}
@@ -40,6 +46,7 @@ export const MessageBubble = memo(function MessageBubble({
         ) : (
           <span aria-hidden className="w-8 shrink-0" />
         ))}
+      {isOwn && !deleted && <MessageActions messageId={messageId} />}
       <div
         className={cn(
           'flex max-w-[85%] min-w-0 flex-col gap-1 md:max-w-[75%]',
@@ -55,6 +62,13 @@ export const MessageBubble = memo(function MessageBubble({
         >
           {withSender && isFirstInGroup && (
             <p className="mb-0.5 text-xs font-semibold text-primary-text">{sender.name}</p>
+          )}
+          {message.replyToId && !deleted && (
+            <QuotedMessage
+              messageId={message.replyToId}
+              tone={isOwn ? 'own' : 'muted'}
+              className="mb-1.5"
+            />
           )}
           {deleted ? (
             <p className="flex items-center gap-1.5 text-sm italic">
@@ -89,6 +103,7 @@ export const MessageBubble = memo(function MessageBubble({
           </p>
         )}
       </div>
+      {!isOwn && !deleted && <MessageActions messageId={messageId} />}
     </div>
   );
 });

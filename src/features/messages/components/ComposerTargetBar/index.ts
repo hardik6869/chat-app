@@ -1,0 +1,1 @@
+export { ComposerTargetBar } from './ComposerTargetBar';

@@ -56,7 +56,8 @@ describe('MessageList', () => {
     await loaded('c-ava');
 
     expect(screen.getByText('edited')).toBeInTheDocument();
-    expect(screen.getByText('This message was deleted')).toBeInTheDocument();
+    // Once on the deleted bubble, once in the quote of the reply that pointed to it.
+    expect(screen.getAllByText('This message was deleted')).toHaveLength(2);
   });
 
   it('keeps only a window of rows in the DOM for very long chats', async () => {
