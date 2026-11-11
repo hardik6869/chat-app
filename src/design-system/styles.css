@@ -61,6 +61,12 @@
     @apply bg-bg font-sans text-text antialiased;
   }
 
+  /* Slim, theme-aware scrollbars instead of the chunky OS default. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+
   /* One consistent, always-visible focus indicator (WCAG 2.4.7 / 2.4.11). */
   :focus-visible {
     outline: 2px solid var(--focus);

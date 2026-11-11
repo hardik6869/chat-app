@@ -1,15 +1,15 @@
 import type { ReactNode } from 'react';
 import { Avatar, Skeleton } from '@/shared/ui';
 import { useCurrentUser } from '../../hooks';
+import { ConversationList } from '../ConversationList';
 
 interface SidebarProps {
   /** Header buttons supplied by the app (e.g. theme toggle). */
   actions?: ReactNode;
-  children?: ReactNode;
 }
 
-/** Sidebar frame: 64 px header aligned with the chat header, then scrollable content. */
-export function Sidebar({ actions, children }: SidebarProps) {
+/** Sidebar: 64 px header aligned with the chat header, then the scrollable conversation list. */
+export function Sidebar({ actions }: SidebarProps) {
   const currentUser = useCurrentUser();
 
   return (
@@ -23,7 +23,9 @@ export function Sidebar({ actions, children }: SidebarProps) {
         <h1 className="flex-1 text-lg font-semibold text-text">Chats</h1>
         {actions}
       </header>
-      <div className="min-h-0 flex-1">{children}</div>
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <ConversationList />
+      </div>
     </div>
   );
 }

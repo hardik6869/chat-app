@@ -27,9 +27,10 @@ function initials(name: string): string {
   return (first + last).toUpperCase() || '?';
 }
 
+/** FNV-1a: spreads similar names across tints better than a simple multiply hash. */
 function tintFor(name: string): string {
-  let hash = 0;
-  for (const char of name) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+  let hash = 0x811c9dc5;
+  for (const char of name) hash = Math.imul(hash ^ char.charCodeAt(0), 0x01000193) >>> 0;
   return tints[hash % tints.length] ?? tints[0];
 }
 
