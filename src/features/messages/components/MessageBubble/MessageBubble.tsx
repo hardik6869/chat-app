@@ -1,5 +1,6 @@
-import { Ban } from 'lucide-react';
+import { Ban, CircleAlert } from 'lucide-react';
 import { memo } from 'react';
+import { MessageStatusIcon } from '@/entities';
 import { cn, formatTime } from '@/shared/lib';
 import { Avatar } from '@/shared/ui';
 import { useMessage } from '../../hooks';
@@ -19,10 +20,11 @@ export const MessageBubble = memo(function MessageBubble({
   isFirstInGroup,
   showSender,
 }: MessageBubbleProps) {
-  const { message, sender } = useMessage(messageId);
+  const { message, sender, retry } = useMessage(messageId);
   if (!message) return null;
   const deleted = message.deletedAt !== undefined;
   const withSender = showSender && !isOwn;
+  const failed = isOwn && message.status === 'failed';
 
   return (
     <div
@@ -40,33 +42,52 @@ export const MessageBubble = memo(function MessageBubble({
         ))}
       <div
         className={cn(
-          'max-w-[85%] min-w-16 rounded-lg px-3 py-2 md:max-w-[75%]',
-          isOwn ? 'bg-bubble-out text-primary-fg' : 'bg-bubble-in text-text',
-          isFirstInGroup && (isOwn ? 'rounded-tr-sm' : 'rounded-tl-sm'),
+          'flex max-w-[85%] min-w-0 flex-col gap-1 md:max-w-[75%]',
+          isOwn ? 'items-end' : 'items-start',
         )}
       >
-        {withSender && isFirstInGroup && (
-          <p className="mb-0.5 text-xs font-semibold text-primary-text">{sender.name}</p>
-        )}
-        {deleted ? (
-          <p className="flex items-center gap-1.5 text-sm italic">
-            <Ban aria-hidden className="size-4" />
-            This message was deleted
-          </p>
-        ) : (
-          <p className="text-sm leading-relaxed wrap-anywhere whitespace-pre-wrap">
-            {message.text}
-          </p>
-        )}
-        <p
+        <div
           className={cn(
-            'mt-1 flex items-center justify-end gap-1 text-xs',
-            isOwn ? 'text-bubble-out-meta' : 'text-text-muted',
+            'max-w-full min-w-16 rounded-lg px-3 py-2',
+            isOwn ? 'bg-bubble-out text-primary-fg' : 'bg-bubble-in text-text',
+            isFirstInGroup && (isOwn ? 'rounded-tr-sm' : 'rounded-tl-sm'),
           )}
         >
-          {message.editedAt && !deleted && <span>edited</span>}
-          <time dateTime={message.createdAt}>{formatTime(message.createdAt)}</time>
-        </p>
+          {withSender && isFirstInGroup && (
+            <p className="mb-0.5 text-xs font-semibold text-primary-text">{sender.name}</p>
+          )}
+          {deleted ? (
+            <p className="flex items-center gap-1.5 text-sm italic">
+              <Ban aria-hidden className="size-4" />
+              This message was deleted
+            </p>
+          ) : (
+            <p className="text-sm leading-relaxed wrap-anywhere whitespace-pre-wrap">
+              {message.text}
+            </p>
+          )}
+          <p
+            className={cn(
+              'mt-1 flex items-center justify-end gap-1 text-xs',
+              isOwn ? 'text-bubble-out-meta' : 'text-text-muted',
+            )}
+          >
+            {message.editedAt && !deleted && <span>edited</span>}
+            <time dateTime={message.createdAt}>{formatTime(message.createdAt)}</time>
+            {isOwn && !deleted && !failed && (
+              <MessageStatusIcon status={message.status} tone="bubble" />
+            )}
+          </p>
+        </div>
+        {failed && (
+          <p className="flex items-center gap-1 text-xs text-danger">
+            <CircleAlert aria-hidden className="size-4" />
+            Not sent
+            <button type="button" onClick={retry} className="rounded-sm font-semibold underline">
+              Retry
+            </button>
+          </p>
+        )}
       </div>
     </div>
   );

@@ -3,3 +3,4 @@ export type { Conversation, DirectConversation, GroupConversation } from './conv
 export { canEditMessage, MAX_MESSAGE_LENGTH, toggleReaction } from './message';
 export type { Message, MessageStatus, Reaction } from './message';
 export type { User, UsersById } from './user';
+export { MessageStatusIcon } from './ui';

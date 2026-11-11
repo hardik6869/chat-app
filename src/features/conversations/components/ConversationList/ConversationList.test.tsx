@@ -43,6 +43,10 @@ describe('ConversationList', () => {
     renderList();
 
     expect(rowFor('Liam Chen')).toHaveTextContent('You: Ping me if you need a review.');
+    expect(within(rowFor('Liam Chen')).getByRole('img', { name: 'Delivered' })).toBeInTheDocument();
+    expect(
+      within(rowFor('Design Team')).queryByRole('img', { name: /Sent|Delivered|Read/ }),
+    ).toBeNull();
     expect(rowFor('Design Team')).toHaveTextContent('Mia: Notes from today are in the doc.');
   });
 

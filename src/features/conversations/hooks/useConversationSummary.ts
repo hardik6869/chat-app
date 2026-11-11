@@ -1,5 +1,11 @@
 import { useShallow } from 'zustand/react/shallow';
-import { getConversationTitle, getPartnerId, isGroup, type Message } from '@/entities';
+import {
+  getConversationTitle,
+  getPartnerId,
+  isGroup,
+  type Message,
+  type MessageStatus,
+} from '@/entities';
 import { selectTypingNames, useChatStore } from '@/store';
 
 interface ConversationSummary {
@@ -8,6 +14,8 @@ interface ConversationSummary {
   isOnline: boolean;
   preview: string;
   isTyping: boolean;
+  /** Delivery state when the last message is mine. */
+  lastStatus?: MessageStatus;
   lastActivityAt?: string;
   unreadCount: number;
 }
@@ -46,6 +54,10 @@ export function useConversationSummary(conversationId: string): ConversationSumm
           typingNames.length > 0
             ? `${group ? `${firstName(typingNames[0] ?? '')} is ` : ''}typing…`
             : previewText(last, lastSender, group || last?.senderId === state.currentUserId),
+        lastStatus:
+          last?.senderId === state.currentUserId && !last.deletedAt && typingNames.length === 0
+            ? last.status
+            : undefined,
         lastActivityAt: last?.createdAt,
         unreadCount: conversation.unreadCount,
       };

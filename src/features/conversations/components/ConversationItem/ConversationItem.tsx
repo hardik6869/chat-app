@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { NavLink } from 'react-router';
+import { MessageStatusIcon } from '@/entities';
 import { cn, formatListTime } from '@/shared/lib';
 import { Avatar, Badge } from '@/shared/ui';
 import { useConversationSummary } from '../../hooks';
@@ -51,9 +52,10 @@ export const ConversationItem = memo(function ConversationItem({
             )}
           </div>
           <div className="mt-0.5 flex items-center justify-between gap-2">
+            {summary.lastStatus && <MessageStatusIcon status={summary.lastStatus} />}
             <p
               className={cn(
-                'truncate text-sm',
+                'min-w-0 flex-1 truncate text-sm',
                 summary.isTyping ? 'text-accent' : unread ? 'text-text' : 'text-text-muted',
               )}
             >
