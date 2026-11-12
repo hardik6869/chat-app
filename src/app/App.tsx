@@ -2,7 +2,8 @@ import { createBrowserRouter, RouterProvider } from 'react-router';
 import { ErrorBoundary, Toaster } from '@/shared/ui';
 import { routes } from './routes';
 
-const router = createBrowserRouter(routes);
+// BASE_URL is '/' locally and '/chat-app/' on GitHub Pages.
+const router = createBrowserRouter(routes, { basename: import.meta.env.BASE_URL });
 
 export function App() {
   return (
