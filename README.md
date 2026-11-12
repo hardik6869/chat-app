@@ -4,7 +4,10 @@ A responsive chat app, similar to a simplified Slack or WhatsApp Web, with direc
 conversations. It is built with **React 19, TypeScript, Vite, Tailwind CSS and Zustand**, and runs on a
 mock backend that simulates a real server (latency, failures, realtime events, persistence).
 
+**Live demo: https://hardik6869.github.io/chat-app/**
+
 ![CI](https://github.com/hardik6869/chat-app/actions/workflows/ci.yml/badge.svg)
+![Deploy](https://github.com/hardik6869/chat-app/actions/workflows/deploy.yml/badge.svg)
 
 ## Contents
 
@@ -233,6 +236,8 @@ colours. Shared size and style variants keep every control consistent.
   - commit-msg: commitlint (Conventional Commits)
   - pre-push: type check + tests
 - **GitHub Actions CI** on every push: lint, format, type check, knip, coverage, build and `npm audit`.
+- **Deployment:** after CI passes on `main`, the app is built for `/chat-app/` and published to GitHub
+  Pages. A `404.html` copy lets links like `/c/c-ava` work on refresh.
 
 ## Assumptions, shortcuts and trade-offs
 
